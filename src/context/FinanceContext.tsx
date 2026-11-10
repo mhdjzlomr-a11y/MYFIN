@@ -83,11 +83,13 @@ export interface ModalDefaults {
   categoryId?: string;
   divisionId?: string;
   type?: TransactionType;
+  date?: string;
 }
 
 interface FinanceContextValue {
   isReady: boolean;
   transactions: Transaction[];
+  allMergedTransactions: Transaction[];
   filteredTransactions: Transaction[];
   divisions: FinanceDivision[];
   categories: Category[];
@@ -134,7 +136,11 @@ interface FinanceContextValue {
   signOutGoogle: () => Promise<void>;
   forceSyncNow: () => Promise<void>;
   archives: StoredPeriodReport[];
-  storePeriodReport: (periodType: ArchivePeriodType) => StoredPeriodReport | null;
+  storePeriodReport: (
+    periodType: ArchivePeriodType,
+    referenceDate?: Date,
+    useAllMergedSource?: boolean,
+  ) => StoredPeriodReport | null;
   startNewPeriod: (periodType: ArchivePeriodType) => void;
   deleteStoredReport: (id: string) => void;
 }
@@ -203,6 +209,24 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   categoriesRef.current = categories;
   const archivesRef = useRef(archives);
   archivesRef.current = archives;
+
+  const allMergedTransactions = useMemo(() => {
+    const map = new Map<string, Transaction>();
+    for (const arc of archives) {
+      for (const tx of arc.transactions) {
+        if (!map.has(tx.id)) {
+          map.set(tx.id, tx);
+        }
+      }
+    }
+    for (const tx of transactions) {
+      map.set(tx.id, tx);
+    }
+    return sortTransactionsNewest(Array.from(map.values()));
+  }, [transactions, archives]);
+
+  const allMergedRef = useRef(allMergedTransactions);
+  allMergedRef.current = allMergedTransactions;
 
   useEffect(() => {
     let active = true;
@@ -692,13 +716,18 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   }, [showToast, syncDeleteIfConnected]);
 
   const archiveAndPersistPeriod = useCallback(
-    (periodType: ArchivePeriodType): StoredPeriodReport | null => {
+    (
+      periodType: ArchivePeriodType,
+      referenceDate?: Date,
+      useAllMergedSource = false,
+    ): StoredPeriodReport | null => {
       const report = buildStoredPeriodReport({
         id: makeId('rep'),
         periodType,
-        transactions: transactionsRef.current,
+        transactions: useAllMergedSource ? allMergedRef.current : transactionsRef.current,
         categories: categoriesRef.current,
         divisions: divisionsRef.current,
+        referenceDate,
       });
       if (report.transactionCount === 0) {
         return null;
@@ -715,8 +744,12 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   );
 
   const storePeriodReport = useCallback(
-    (periodType: ArchivePeriodType): StoredPeriodReport | null => {
-      const saved = archiveAndPersistPeriod(periodType);
+    (
+      periodType: ArchivePeriodType,
+      referenceDate?: Date,
+      useAllMergedSource = false,
+    ): StoredPeriodReport | null => {
+      const saved = archiveAndPersistPeriod(periodType, referenceDate, useAllMergedSource);
       if (!saved) {
         showToast('toastNoEntriesToArchive', 'error');
         return null;
@@ -865,6 +898,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const value: FinanceContextValue = {
     isReady,
     transactions,
+    allMergedTransactions,
     filteredTransactions,
     divisions,
     categories,

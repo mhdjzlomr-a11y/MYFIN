@@ -167,4 +167,57 @@ describe('MYFIN App integration', () => {
 
     confirmSpy.mockRestore();
   });
+
+  it('browses entries by calendar for specific day, week, month, and overall total', async () => {
+    render(<App />);
+    expect((await screen.findAllByText('MYFIN')).length).toBeGreaterThan(0);
+
+    // Pre-populate entries across different dates (2026-10-15 & 2026-11-03 & 2026-11-10)
+    // Open Calendar tab via Dashboard quick button
+    fireEvent.click(screen.getAllByText('കലണ്ടർ')[0]);
+    const calSection = await screen.findByLabelText('കലണ്ടർ റിപ്പോർട്ട്');
+    expect(calSection).toBeInTheDocument();
+
+    // Add an entry directly on 2026-11-10 via calendar button
+    const cell10 = within(calSection).getByLabelText('2026-11-10');
+    fireEvent.click(cell10);
+    fireEvent.click(screen.getByText('ഈ തീയതിയിൽ ചേർക്കുക'));
+    const modal = screen.getByRole('dialog');
+    fireEvent.change(within(modal).getByLabelText(/തുക/i), { target: { value: '750' } });
+    fireEvent.change(within(modal).getByLabelText(/കുറിപ്പ്/i), { target: { value: 'പത്താം തീയതി ചെലവ്' } });
+    fireEvent.click(within(modal).getByText('സേവ് ചെയ്യുക'));
+
+    const reportPanel = await screen.findByLabelText('Selected calendar report');
+    await waitFor(() => {
+      expect(within(reportPanel).getByText('പത്താം തീയതി ചെലവ്')).toBeInTheDocument();
+    });
+
+    // Add another entry in a different week (2026-11-03) and check Day vs Week vs Month vs Overall
+    fireEvent.click(within(calSection).getByLabelText('2026-11-03'));
+    fireEvent.click(screen.getByText('ഈ തീയതിയിൽ ചേർക്കുക'));
+    const modal2 = screen.getByRole('dialog');
+    fireEvent.change(within(modal2).getByLabelText(/തുക/i), { target: { value: '300' } });
+    fireEvent.change(within(modal2).getByLabelText(/കുറിപ്പ്/i), { target: { value: 'മൂന്നാം തീയതി ചെലവ്' } });
+    fireEvent.click(within(modal2).getByText('സേവ് ചെയ്യുക'));
+
+    await waitFor(() => {
+      expect(within(reportPanel).getByText('മൂന്നാം തീയതി ചെലവ്')).toBeInTheDocument();
+      expect(within(reportPanel).queryByText('പത്താം തീയതി ചെലവ്')).not.toBeInTheDocument();
+    });
+
+    // Switch to Week containing 2026-11-10 (Mon 09 - Sun 15) -> shows 750 but NOT 300
+    fireEvent.click(within(calSection).getByLabelText('2026-11-10'));
+    fireEvent.click(within(calSection).getByText('തിരഞ്ഞെടുത്ത ആഴ്ച'));
+    expect(within(reportPanel).getByText('പത്താം തീയതി ചെലവ്')).toBeInTheDocument();
+    expect(within(reportPanel).queryByText('മൂന്നാം തീയതി ചെലവ്')).not.toBeInTheDocument();
+
+    // Switch to Selected Month -> shows BOTH 750 and 300
+    fireEvent.click(within(calSection).getByText(/തിരഞ്ഞെടുത്ത മാസം/i));
+    expect(within(reportPanel).getByText('പത്താം തീയതി ചെലവ്')).toBeInTheDocument();
+    expect(within(reportPanel).getByText('മൂന്നാം തീയതി ചെലവ്')).toBeInTheDocument();
+
+    // Switch to Overall Total -> shows BOTH as well
+    fireEvent.click(within(calSection).getByText('മൊത്തം റിപ്പോർട്ട്'));
+    expect(within(reportPanel).getByText('₹1,050')).toBeInTheDocument();
+  });
 });

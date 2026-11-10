@@ -14,6 +14,7 @@ import {
   ArrowUpRight,
   BarChart2,
   Calendar,
+  CalendarDays,
   ChevronRight,
   Edit3,
   PieChart,
@@ -436,6 +437,16 @@ export function DashboardBento() {
                   <span>{p.label}</span>
                 </button>
               ))}
+
+              <button
+                type="button"
+                className="folder-tab-btn"
+                onClick={() => setActiveTab('calendar')}
+                title={t(lang, 'calendarTitle')}
+              >
+                <CalendarDays size={13} />
+                <span>{t(lang, 'navCalendar')}</span>
+              </button>
 
               <button
                 type="button"

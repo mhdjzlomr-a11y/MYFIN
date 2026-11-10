@@ -53,7 +53,7 @@ export function TransactionModal() {
       const initialType = modalDefaults?.type ?? 'expense';
       setType(initialType);
       setAmount('');
-      setDate(toLocalIsoDate(new Date()));
+      setDate(modalDefaults?.date ?? toLocalIsoDate(new Date()));
       setDivisionId(modalDefaults?.divisionId ?? divisions[0]?.id ?? '');
       const matchingCat =
         categories.find((c) => c.id === modalDefaults?.categoryId) ??

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CalendarReports } from './components/CalendarReports';
 import { CategoryOverview } from './components/CategoryOverview';
 import { ChartsSection } from './components/ChartsSection';
 import { CloudSyncModal } from './components/CloudSyncModal';
@@ -36,6 +37,8 @@ function FinanceWorkspace() {
           <div key={activeTab} className="tab-panel-animate">
             {activeTab === 'dashboard' && <DashboardBento />}
 
+            {activeTab === 'calendar' && <CalendarReports />}
+
             {activeTab === 'categories' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <FilterBar />
@@ -64,7 +67,7 @@ function FinanceWorkspace() {
       </div>
 
       {/* Dedicated A4 Print Sheet shown only in @media print */}
-      <PrintableReportSheet className="print-only-report" />
+      {activeTab !== 'calendar' && <PrintableReportSheet className="print-only-report" />}
 
       <TransactionModal />
       <CloudSyncModal />

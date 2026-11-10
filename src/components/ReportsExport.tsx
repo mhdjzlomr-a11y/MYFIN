@@ -20,14 +20,28 @@ import {
   exportReportElementToPdf,
   exportTransactionsToCsv,
 } from '../services/export';
-import type { ArchivePeriodType, StoredPeriodReport } from '../types/finance';
+import type {
+  ArchivePeriodType,
+  CategorySummaryRow,
+  FinanceSummary,
+  StoredPeriodReport,
+  Transaction,
+} from '../types/finance';
 
 export function PrintableReportSheet({
   forwardedRef,
   className,
+  overrideTransactions,
+  overrideSummary,
+  overrideCategorySummary,
+  overridePeriodLabel,
 }: {
   forwardedRef?: React.RefObject<HTMLDivElement>;
   className?: string;
+  overrideTransactions?: Transaction[];
+  overrideSummary?: FinanceSummary;
+  overrideCategorySummary?: CategorySummaryRow[];
+  overridePeriodLabel?: string;
 }) {
   const {
     filteredTransactions,
@@ -39,10 +53,13 @@ export function PrintableReportSheet({
     settings,
   } = useFinance();
   const lang = settings.language;
-  const periodLabel = getPeriodLabel(filters, lang);
+  const activeTransactions = overrideTransactions ?? filteredTransactions;
+  const activeSummary = overrideSummary ?? summary;
+  const activeCategoryRows = overrideCategorySummary ?? categorySummary;
+  const periodLabel = overridePeriodLabel ?? getPeriodLabel(filters, lang);
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const divisionMap = useMemo(() => new Map(divisions.map((d) => [d.id, d])), [divisions]);
-  const activeCategories = categorySummary.filter((r) => r.count > 0);
+  const activeCategories = activeCategoryRows.filter((r) => r.count > 0);
 
   return (
     <div ref={forwardedRef} className={className}>
@@ -60,7 +77,7 @@ export function PrintableReportSheet({
             {t(lang, 'generatedOn')}: {new Date().toLocaleDateString(lang === 'ml' ? 'ml-IN' : 'en-IN')}
           </div>
           <div>
-            {t(lang, 'transactionsCount')}: {summary.transactionCount}
+            {t(lang, 'transactionsCount')}: {activeSummary.transactionCount}
           </div>
         </div>
       </div>
@@ -69,19 +86,19 @@ export function PrintableReportSheet({
         <div className="report-sheet-kpi-box">
           <div style={{ fontSize: '11px', color: '#475569' }}>{t(lang, 'totalIncome')}</div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#059669' }}>
-            {formatCurrency(summary.totalIncome)}
+            {formatCurrency(activeSummary.totalIncome)}
           </div>
         </div>
         <div className="report-sheet-kpi-box">
           <div style={{ fontSize: '11px', color: '#475569' }}>{t(lang, 'totalExpense')}</div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#dc2626' }}>
-            {formatCurrency(summary.totalExpense)}
+            {formatCurrency(activeSummary.totalExpense)}
           </div>
         </div>
         <div className="report-sheet-kpi-box">
           <div style={{ fontSize: '11px', color: '#475569' }}>{t(lang, 'netBalance')}</div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#2563eb' }}>
-            {formatCurrency(summary.balance)}
+            {formatCurrency(activeSummary.balance)}
           </div>
         </div>
       </div>
@@ -128,7 +145,7 @@ export function PrintableReportSheet({
             </tr>
           </thead>
           <tbody>
-            {filteredTransactions.map((tx) => {
+            {activeTransactions.map((tx) => {
               const cat = categoryMap.get(tx.categoryId);
               const div = divisionMap.get(tx.divisionId);
               return (

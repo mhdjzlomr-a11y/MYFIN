@@ -4,7 +4,7 @@ export type Language = 'ml' | 'en';
 export type Theme = 'light' | 'dark';
 export type DateFilterPreset = 'daily' | 'weekly' | 'monthly' | 'all' | 'custom';
 export type ArchivePeriodType = 'weekly' | 'monthly';
-export type ActiveTab = 'dashboard' | 'categories' | 'transactions' | 'reports';
+export type ActiveTab = 'dashboard' | 'calendar' | 'categories' | 'transactions' | 'reports';
 
 export interface FinanceDivision {
   id: string;

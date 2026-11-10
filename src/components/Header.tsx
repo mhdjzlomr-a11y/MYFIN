@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  CalendarDays,
   ChevronDown,
   Cloud,
   FolderKanban,
@@ -49,8 +50,8 @@ export function Header({
 
   const navItems: Array<{ id: ActiveTab; label: string; icon: JSX.Element }> = [
     { id: 'dashboard', label: t(lang, 'navDashboard'), icon: <LayoutDashboard size={17} /> },
+    { id: 'calendar', label: t(lang, 'navCalendar'), icon: <CalendarDays size={17} /> },
     { id: 'categories', label: t(lang, 'navCategories'), icon: <FolderKanban size={17} /> },
-    { id: 'transactions', label: t(lang, 'navTransactions'), icon: <ListOrdered size={17} /> },
     { id: 'reports', label: t(lang, 'navReports'), icon: <BarChart3 size={17} /> },
   ];
 
@@ -153,6 +154,16 @@ export function Header({
             <button
               type="button"
               className="header-square-btn header-desktop-only"
+              onClick={() => setActiveTab('calendar')}
+              aria-label={t(lang, 'navCalendar')}
+              title={t(lang, 'navCalendar')}
+            >
+              <CalendarDays size={16} />
+            </button>
+
+            <button
+              type="button"
+              className="header-square-btn header-desktop-only"
               onClick={() => setActiveTab('categories')}
               aria-label={t(lang, 'navCategories')}
               title={t(lang, 'navCategories')}
@@ -219,6 +230,7 @@ export function LeftSidebar({ isExpanded, onToggleExpand, onCloseMobile }: Sideb
 
   const navItems: Array<{ id: ActiveTab; label: string; icon: JSX.Element }> = [
     { id: 'dashboard', label: t(lang, 'navDashboard'), icon: <LayoutDashboard size={19} /> },
+    { id: 'calendar', label: t(lang, 'navCalendar'), icon: <CalendarDays size={19} /> },
     { id: 'categories', label: t(lang, 'navCategories'), icon: <FolderKanban size={19} /> },
     { id: 'transactions', label: t(lang, 'navTransactions'), icon: <ListOrdered size={19} /> },
     { id: 'reports', label: t(lang, 'navReports'), icon: <BarChart3 size={19} /> },
