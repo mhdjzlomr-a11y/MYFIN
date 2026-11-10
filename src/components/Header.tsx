@@ -1,13 +1,16 @@
 import {
   BarChart3,
+  ChevronDown,
   FolderKanban,
-  Languages,
+  Globe,
   LayoutDashboard,
   ListOrdered,
+  Menu,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
+  RotateCcw,
   Sun,
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
@@ -27,8 +30,16 @@ export function Header({
   isSidebarExpanded: boolean;
   onToggleSidebar: () => void;
 }) {
-  const { settings, activeTab, setActiveTab, toggleTheme, toggleLanguage, openAddModal } =
-    useFinance();
+  const {
+    settings,
+    summary,
+    activeTab,
+    setActiveTab,
+    toggleTheme,
+    toggleLanguage,
+    resetFilters,
+    openAddModal,
+  } = useFinance();
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
 
@@ -43,50 +54,76 @@ export function Header({
     <>
       <header className="app-header no-print">
         <div className="header-inner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
               type="button"
-              className="sidebar-toggle-btn"
+              className="sidebar-toggle-btn header-square-btn"
               onClick={onToggleSidebar}
               aria-label="Toggle navigation sidebar"
+              aria-expanded={isSidebarExpanded}
               title="Menu"
             >
-              {isSidebarExpanded ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+              <Menu size={18} />
             </button>
 
-            <div className="brand-pill">
-              <div className="brand-logo" aria-hidden="true">
-                ₹
-              </div>
-              <h1 className="brand-title">
-                <span>{t(lang, 'appName')}</span>
-              </h1>
-            </div>
+            <h1 className="brand-wordmark">
+              <span>{t(lang, 'appName')}</span>
+              <span className="brand-dot">.</span>
+            </h1>
           </div>
 
           <div className="header-actions">
             <button
               type="button"
-              className="icon-btn"
+              className="header-lang-pill"
               onClick={toggleLanguage}
               title={t(lang, 'switchLang')}
               aria-label={t(lang, 'switchLang')}
             >
-              <Languages size={15} color="var(--accent)" />
+              <Globe size={15} />
               <span>{lang === 'ml' ? 'English' : 'മലയാളം'}</span>
+              <ChevronDown size={14} />
             </button>
 
             <button
               type="button"
-              className="icon-btn"
+              className="header-square-btn"
               onClick={toggleTheme}
               aria-label={isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
               title={isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
             >
-              {isDark ? <Sun size={15} color="#facc15" /> : <Moon size={15} color="var(--navy-deep)" />}
-              <span className="theme-btn-label">
-                {isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
-              </span>
+              {isDark ? <Sun size={16} color="#facc15" /> : <Moon size={16} />}
+            </button>
+
+            <button
+              type="button"
+              className="header-square-btn"
+              onClick={resetFilters}
+              aria-label={t(lang, 'clearFilters')}
+              title={t(lang, 'clearFilters')}
+            >
+              <RotateCcw size={15} />
+            </button>
+
+            <button
+              type="button"
+              className="header-square-btn header-desktop-only"
+              onClick={() => setActiveTab('categories')}
+              aria-label={t(lang, 'navCategories')}
+              title={t(lang, 'navCategories')}
+            >
+              <FolderKanban size={16} />
+            </button>
+
+            <button
+              type="button"
+              className="header-count-circle"
+              onClick={() => setActiveTab('transactions')}
+              aria-label={t(lang, 'navTransactions')}
+              title={t(lang, 'navTransactions')}
+            >
+              <span>{summary.transactionCount}</span>
+              <span className="header-online-dot" aria-hidden="true" />
             </button>
           </div>
         </div>
