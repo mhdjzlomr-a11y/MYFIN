@@ -335,8 +335,20 @@ export function ReportsExport() {
         </div>
       </section>
 
-      {/* Hidden Offscreen Sheet used for crisp Malayalam PDF rendering */}
-      <PrintableReportSheet forwardedRef={pdfTargetRef} className="pdf-render-host" />
+      {/* Hidden Offscreen Sheet used for crisp Malayalam PDF rendering without causing mobile scroll */}
+      <div
+        style={{
+          position: 'fixed',
+          width: 0,
+          height: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none',
+          opacity: 0,
+        }}
+        aria-hidden="true"
+      >
+        <PrintableReportSheet forwardedRef={pdfTargetRef} className="pdf-render-host" />
+      </div>
     </div>
   );
 }

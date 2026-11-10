@@ -92,5 +92,18 @@ describe('MYFIN App integration', () => {
     fireEvent.click(screen.getByText('English'));
     expect((await screen.findAllByText('Dashboard')).length).toBeGreaterThan(0);
     expect(screen.getByText('Download CSV')).toBeInTheDocument();
+
+    // Switch back to Dashboard and test Search Category dropdown & filtering
+    fireEvent.click(screen.getAllByText('Dashboard')[0]);
+    const searchInput = screen.getAllByPlaceholderText(/Search note, category/i)[0];
+    fireEvent.focus(searchInput);
+    fireEvent.change(searchInput, { target: { value: 'Food' } });
+    const dropdown = await screen.findByRole('listbox', { name: 'Category search matches' });
+    fireEvent.mouseDown(within(dropdown).getByText(/Food/i));
+
+    const categorySection = await screen.findByLabelText(
+      'Categories and Divisions unified summary',
+    );
+    expect(within(categorySection).getByTestId('selected-breakdown-panel')).toHaveTextContent('Food');
   });
 });

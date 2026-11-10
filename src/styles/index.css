@@ -83,6 +83,8 @@ body {
   background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
+  overflow-x: hidden;
+  max-width: 100%;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -100,6 +102,9 @@ button {
 
 .app-shell {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   padding-bottom: 86px;
@@ -111,6 +116,7 @@ button {
   flex: 1;
   max-width: 1440px;
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
   position: relative;
 }
@@ -516,6 +522,45 @@ button {
   min-width: 220px;
 }
 
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.search-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background var(--transition);
+}
+
+.search-dropdown-item:hover {
+  background: var(--accent-soft);
+}
+
 .search-pill-icon {
   position: absolute;
   left: 14px;
@@ -634,12 +679,16 @@ button {
   grid-template-columns: 300px 1fr 310px;
   gap: 16px;
   align-items: stretch;
+  width: 100%;
+  min-width: 0;
 }
 
 .crextio-col {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .card {
@@ -648,6 +697,8 @@ button {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   padding: 20px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Left Ice-Blue Balance Spotlight Card (Crextio Alex Chen Card Feel) */
@@ -1178,7 +1229,7 @@ button {
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
   gap: 14px;
 }
 
@@ -1590,7 +1641,8 @@ button {
 
 @media (max-width: 768px) {
   .desktop-nav,
-  .theme-btn-label {
+  .theme-btn-label,
+  .brand-subtitle {
     display: none;
   }
   .left-sidebar {
@@ -1622,14 +1674,68 @@ button {
     z-index: 50;
   }
   .header-inner {
-    padding: 10px 14px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .brand-pill {
+    padding: 4px 10px 4px 5px;
+    gap: 7px;
+  }
+  .brand-title {
+    font-size: 1.05rem;
+  }
+  .icon-btn {
+    padding: 0 10px;
+    height: 34px;
+    font-size: 0.78rem;
   }
   .main-container {
-    padding: 14px;
+    padding: 12px;
+    gap: 14px;
+  }
+  .card {
+    padding: 15px;
+  }
+  .hero-title {
+    font-size: 1.65rem;
+  }
+  .hero-toolbar {
+    width: 100%;
   }
   .search-pill-wrap {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .segmented-progress-bar {
+    flex-wrap: wrap;
+  }
+  .seg-pill {
+    min-width: 0;
+    flex: 1 1 auto;
+    font-size: 0.72rem;
+    padding: 0 10px;
+    height: 32px;
+  }
+  .hero-big-stats {
+    gap: 14px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .hero-stat-num {
+    font-size: 1.28rem;
+  }
+  .capsule-fill {
+    min-width: 0;
     flex: 1;
-    min-width: 160px;
+  }
+  .navy-tx-row {
+    max-width: 100%;
+    gap: 8px;
+  }
+  .todo-tx-left {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
   }
   .kpi-grid {
     grid-template-columns: 1fr 1fr;

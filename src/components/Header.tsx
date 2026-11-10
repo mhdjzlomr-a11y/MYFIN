@@ -58,12 +58,9 @@ export function Header({
               <div className="brand-logo" aria-hidden="true">
                 ₹
               </div>
-              <div>
-                <h1 className="brand-title">
-                  <span>{t(lang, 'appName')}</span>
-                </h1>
-                <p className="brand-subtitle">{t(lang, 'appTagline')}</p>
-              </div>
+              <h1 className="brand-title">
+                <span>{t(lang, 'appName')}</span>
+              </h1>
             </div>
           </div>
 

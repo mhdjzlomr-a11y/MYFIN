@@ -14,6 +14,9 @@ export function CategoryOverview() {
     filteredTransactions,
     categories,
     divisions,
+    filters,
+    setFilters,
+    resetFilters,
     addCategory,
     deleteCategory,
     addDivision,
@@ -77,22 +80,76 @@ export function CategoryOverview() {
     resetCreateForm();
   };
 
+  const visibleCategorySummary = useMemo(() => {
+    const query = filters.searchQuery.trim().toLowerCase();
+    return categorySummary.filter((row) => {
+      if (filters.categoryId !== 'all' && row.category.id !== filters.categoryId) {
+        return false;
+      }
+      if (query) {
+        const text = `${row.category.nameMl} ${row.category.nameEn}`.toLowerCase();
+        if (!text.includes(query) && row.count === 0) return false;
+      }
+      return true;
+    });
+  }, [categorySummary, filters.categoryId, filters.searchQuery]);
+
+  const visibleDivisionSummary = useMemo(() => {
+    const query = filters.searchQuery.trim().toLowerCase();
+    return divisionSummary.filter((row) => {
+      if (filters.divisionId !== 'all' && row.division.id !== filters.divisionId) {
+        return false;
+      }
+      if (query) {
+        const text = `${row.division.nameMl} ${row.division.nameEn}`.toLowerCase();
+        if (!text.includes(query) && row.count === 0) return false;
+      }
+      return true;
+    });
+  }, [divisionSummary, filters.divisionId, filters.searchQuery]);
+
+  const activeSelectionId =
+    selectedId ??
+    (mode === 'category' && filters.categoryId !== 'all'
+      ? filters.categoryId
+      : mode === 'division' && filters.divisionId !== 'all'
+        ? filters.divisionId
+        : null);
+
   const selectedCategoryRow = useMemo(
-    () => (mode === 'category' && selectedId ? categorySummary.find((r) => r.category.id === selectedId) : null),
-    [mode, selectedId, categorySummary],
+    () =>
+      mode === 'category' && activeSelectionId
+        ? categorySummary.find((r) => r.category.id === activeSelectionId)
+        : null,
+    [mode, activeSelectionId, categorySummary],
   );
 
   const selectedDivisionRow = useMemo(
-    () => (mode === 'division' && selectedId ? divisionSummary.find((r) => r.division.id === selectedId) : null),
-    [mode, selectedId, divisionSummary],
+    () =>
+      mode === 'division' && activeSelectionId
+        ? divisionSummary.find((r) => r.division.id === activeSelectionId)
+        : null,
+    [mode, activeSelectionId, divisionSummary],
   );
 
   const selectedTransactions = useMemo(() => {
-    if (!selectedId) return [];
+    if (!activeSelectionId) return [];
     return filteredTransactions.filter((tx) =>
-      mode === 'category' ? tx.categoryId === selectedId : tx.divisionId === selectedId,
+      mode === 'category' ? tx.categoryId === activeSelectionId : tx.divisionId === activeSelectionId,
     );
-  }, [filteredTransactions, mode, selectedId]);
+  }, [filteredTransactions, mode, activeSelectionId]);
+
+  const toggleCardSelection = (id: string, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedId(null);
+      setFilters((prev) => ({
+        ...prev,
+        ...(mode === 'category' ? { categoryId: 'all' } : { divisionId: 'all' }),
+      }));
+    } else {
+      setSelectedId(id);
+    }
+  };
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const divisionMap = useMemo(() => new Map(divisions.map((d) => [d.id, d])), [divisions]);
@@ -337,7 +394,14 @@ export function CategoryOverview() {
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => setSelectedId(null)}
+                onClick={() => {
+                  setSelectedId(null);
+                  setFilters((prev) => ({
+                    ...prev,
+                    categoryId: 'all',
+                    divisionId: 'all',
+                  }));
+                }}
               >
                 <ArrowLeft size={15} />
                 <span>{t(lang, 'showAllItems')}</span>
@@ -449,20 +513,28 @@ export function CategoryOverview() {
 
       {/* Unified Category or Division Cards Grid */}
       {mode === 'category' ? (
+        visibleCategorySummary.length === 0 ? (
+          <div className="empty-state">
+            <p>{t(lang, 'noChartData')}</p>
+            <button type="button" className="btn-secondary" onClick={resetFilters}>
+              {t(lang, 'clearFilters')}
+            </button>
+          </div>
+        ) : (
         <div className="category-grid">
-          {categorySummary.map((row) => {
-            const isSelected = selectedId === row.category.id;
+          {visibleCategorySummary.map((row) => {
+            const isSelected = activeSelectionId === row.category.id;
             return (
               <div
                 key={row.category.id}
                 role="button"
                 tabIndex={0}
                 className={`category-card ${isSelected ? 'selected' : ''}`}
-                onClick={() => setSelectedId(isSelected ? null : row.category.id)}
+                onClick={() => toggleCardSelection(row.category.id, isSelected)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setSelectedId(isSelected ? null : row.category.id);
+                    toggleCardSelection(row.category.id, isSelected);
                   }
                 }}
               >
@@ -556,21 +628,29 @@ export function CategoryOverview() {
             );
           })}
         </div>
+        )
+      ) : visibleDivisionSummary.length === 0 ? (
+        <div className="empty-state">
+          <p>{t(lang, 'noChartData')}</p>
+          <button type="button" className="btn-secondary" onClick={resetFilters}>
+            {t(lang, 'clearFilters')}
+          </button>
+        </div>
       ) : (
         <div className="category-grid">
-          {divisionSummary.map((row) => {
-            const isSelected = selectedId === row.division.id;
+          {visibleDivisionSummary.map((row) => {
+            const isSelected = activeSelectionId === row.division.id;
             return (
               <div
                 key={row.division.id}
                 role="button"
                 tabIndex={0}
                 className={`category-card ${isSelected ? 'selected' : ''}`}
-                onClick={() => setSelectedId(isSelected ? null : row.division.id)}
+                onClick={() => toggleCardSelection(row.division.id, isSelected)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setSelectedId(isSelected ? null : row.division.id);
+                    toggleCardSelection(row.division.id, isSelected);
                   }
                 }}
               >
