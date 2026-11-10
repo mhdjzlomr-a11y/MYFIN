@@ -23,8 +23,8 @@ export function ChartsSection() {
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
 
-  const textColor = isDark ? '#cbd5e1' : '#475467';
-  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(17, 19, 21, 0.06)';
+  const textColor = isDark ? '#c5d6ee' : '#3c4f6b';
+  const gridColor = isDark ? 'rgba(148, 184, 232, 0.14)' : 'rgba(19, 49, 92, 0.08)';
 
   const timeSeries = useMemo(
     () =>
@@ -50,22 +50,22 @@ export function ChartsSection() {
         {
           label: t(lang, 'income'),
           data: timeSeries.income,
-          backgroundColor: '#0ac775',
-          borderRadius: 12,
+          backgroundColor: isDark ? '#3b91ff' : '#13315c',
+          borderRadius: 10,
           borderSkipped: false as const,
-          maxBarThickness: 36,
+          maxBarThickness: 32,
         },
         {
           label: t(lang, 'expense'),
           data: timeSeries.expense,
-          backgroundColor: '#0b66ff',
-          borderRadius: 12,
+          backgroundColor: '#1c7eff',
+          borderRadius: 10,
           borderSkipped: false as const,
-          maxBarThickness: 36,
+          maxBarThickness: 32,
         },
       ],
     }),
-    [timeSeries, lang],
+    [timeSeries, lang, isDark],
   );
 
   const barOptions: ChartOptions<'bar'> = useMemo(
@@ -78,7 +78,7 @@ export function ChartsSection() {
           labels: { color: textColor, boxWidth: 10, usePointStyle: true, pointStyle: 'circle', padding: 14 },
         },
         tooltip: {
-          backgroundColor: '#111315',
+          backgroundColor: '#13315c',
           padding: 12,
           cornerRadius: 12,
           callbacks: {
@@ -111,9 +111,9 @@ export function ChartsSection() {
         {
           data: expenseCategories.map((r) => r.expense),
           backgroundColor: expenseCategories.map((r, i) =>
-            i === 0 ? '#0b66ff' : i === 1 ? '#0ac775' : r.category.color,
+            i === 0 ? '#13315c' : i === 1 ? '#1c7eff' : i === 2 ? '#5ba2ff' : r.category.color,
           ),
-          borderColor: isDark ? '#161a23' : '#ffffff',
+          borderColor: isDark ? '#122038' : '#ffffff',
           borderWidth: 3,
           hoverOffset: 8,
         },

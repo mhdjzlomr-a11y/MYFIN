@@ -11,7 +11,7 @@ describe('MYFIN App integration', () => {
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(<App />);
 
-    expect(await screen.findByText('MYFIN')).toBeInTheDocument();
+    expect((await screen.findAllByText('MYFIN')).length).toBeGreaterThan(0);
     expect(screen.getAllByText('ഡാഷ്ബോർഡ്').length).toBeGreaterThan(0);
 
     // Open Add Transaction modal
@@ -78,7 +78,7 @@ describe('MYFIN App integration', () => {
 
   it('supports Reports export buttons, Dark/Normal theme toggle, and Malayalam/English switch', async () => {
     render(<App />);
-    expect(await screen.findByText('MYFIN')).toBeInTheDocument();
+    expect((await screen.findAllByText('MYFIN')).length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getAllByText('റിപ്പോർട്ടുകൾ')[0]);
     expect(await screen.findByText('CSV ഡൗൺലോഡ്')).toBeInTheDocument();

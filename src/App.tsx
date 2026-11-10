@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { CategoryOverview } from './components/CategoryOverview';
 import { ChartsSection } from './components/ChartsSection';
 import { DashboardBento } from './components/DashboardBento';
 import { FilterBar } from './components/FilterBar';
-import { Header } from './components/Header';
+import { Header, LeftSidebar } from './components/Header';
 import { PrintableReportSheet, ReportsExport } from './components/ReportsExport';
 import { SummaryCards } from './components/SummaryCards';
 import { TransactionList } from './components/TransactionList';
@@ -12,40 +13,54 @@ import { FinanceProvider, useFinance } from './context/FinanceContext';
 
 function FinanceWorkspace() {
   const { activeTab, toast } = useFinance();
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   return (
     <div className="app-shell">
-      <Header />
+      <Header
+        isSidebarExpanded={isSidebarExpanded}
+        onToggleSidebar={() => setIsSidebarExpanded((prev) => !prev)}
+      />
 
-      <main className="main-container no-print">
-        <WorkspaceHero />
+      <div className="app-body-layout no-print">
+        <LeftSidebar
+          isExpanded={isSidebarExpanded}
+          onToggleExpand={() => setIsSidebarExpanded((prev) => !prev)}
+          onCloseMobile={() => setIsSidebarExpanded(false)}
+        />
 
-        {activeTab === 'dashboard' && <DashboardBento />}
+        <main className="main-container">
+          <WorkspaceHero />
 
-        {activeTab === 'categories' && (
-          <>
-            <FilterBar />
-            <CategoryOverview />
-          </>
-        )}
+          <div key={activeTab} className="tab-panel-animate">
+            {activeTab === 'dashboard' && <DashboardBento />}
 
-        {activeTab === 'transactions' && (
-          <>
-            <FilterBar />
-            <SummaryCards />
-            <TransactionList />
-          </>
-        )}
+            {activeTab === 'categories' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <FilterBar />
+                <CategoryOverview />
+              </div>
+            )}
 
-        {activeTab === 'reports' && (
-          <>
-            <FilterBar />
-            <SummaryCards />
-            <ChartsSection />
-            <ReportsExport />
-          </>
-        )}
-      </main>
+            {activeTab === 'transactions' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <FilterBar />
+                <SummaryCards />
+                <TransactionList />
+              </div>
+            )}
+
+            {activeTab === 'reports' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <FilterBar />
+                <SummaryCards />
+                <ChartsSection />
+                <ReportsExport />
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
 
       {/* Dedicated A4 Print Sheet shown only in @media print */}
       <PrintableReportSheet className="print-only-report" />

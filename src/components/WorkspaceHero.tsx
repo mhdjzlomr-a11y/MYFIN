@@ -1,79 +1,89 @@
-import { Plus, Search } from 'lucide-react';
+import { Layers, Plus, Receipt, Search, Wallet } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
-import { getLocalizedName, t } from '../i18n/translations';
-import { getPeriodLabel } from '../services/analytics';
+import { formatCurrency, t } from '../i18n/translations';
 
 export function WorkspaceHero() {
-  const { settings, divisions, filters, setFilters, openAddModal, setActiveTab } = useFinance();
+  const { settings, summary, filters, setFilters, openAddModal } = useFinance();
   const lang = settings.language;
-  const periodLabel = getPeriodLabel(filters, lang);
+
+  const totalFlow = summary.totalIncome + summary.totalExpense;
+  const incomePct = totalFlow > 0 ? Math.round((summary.totalIncome / totalFlow) * 100) : 50;
+  const expensePct = totalFlow > 0 ? 100 - incomePct : 50;
 
   return (
-    <section className="hero-action-row no-print" aria-label="Workspace controls">
-      <div className="hero-title-wrap">
-        <h2 className="hero-title">{t(lang, 'appTagline')}</h2>
-        <p className="hero-subtitle">
-          {t(lang, 'reportPeriod')}: {periodLabel}
-        </p>
+    <section className="crextio-hero no-print" aria-label="Workspace overview">
+      <div className="crextio-greeting-row">
+        <div>
+          <h2 className="hero-title">{t(lang, 'appName')}</h2>
+          <p className="hero-subtitle">{t(lang, 'appTagline')}</p>
+        </div>
+
+        <div className="hero-toolbar">
+          <div className="search-pill-wrap">
+            <Search size={15} className="search-pill-icon" />
+            <input
+              type="search"
+              className="search-pill-input"
+              placeholder={t(lang, 'searchPlaceholder')}
+              aria-label={t(lang, 'note')}
+              value={filters.searchQuery}
+              onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
+            />
+          </div>
+
+          <button type="button" className="btn-primary" onClick={() => openAddModal()}>
+            <Plus size={17} />
+            <span>{t(lang, 'addEntry')}</span>
+          </button>
+        </div>
       </div>
 
-      <div className="hero-toolbar">
-        {/* Division Filter Chips (Onyx Avatar/Team Strip Model) */}
-        <div className="division-chips-bar" role="group" aria-label={t(lang, 'division')}>
-          <button
-            type="button"
-            className={`div-chip ${filters.divisionId === 'all' ? 'active' : ''}`}
-            onClick={() => setFilters((prev) => ({ ...prev, divisionId: 'all' }))}
+      {/* Crextio Segmented Progress Bar + Hero Numerals */}
+      <div className="crextio-strip-row">
+        <div className="segmented-progress-bar" aria-hidden="true">
+          <div
+            className="seg-pill navy"
+            style={{ width: `${Math.max(22, Math.min(62, incomePct))}%` }}
           >
-            {t(lang, 'all')}
-          </button>
-
-          {divisions.slice(0, 4).map((div) => (
-            <button
-              key={div.id}
-              type="button"
-              className={`div-chip ${filters.divisionId === div.id ? 'active' : ''}`}
-              onClick={() =>
-                setFilters((prev) => ({
-                  ...prev,
-                  divisionId: prev.divisionId === div.id ? 'all' : div.id,
-                }))
-              }
-            >
-              <span>{div.icon}</span>
-              <span>{getLocalizedName(div, lang)}</span>
-            </button>
-          ))}
-
-          <button
-            type="button"
-            className="div-chip"
-            onClick={() => setActiveTab('categories')}
-            title={t(lang, 'addNewDivision')}
+            {t(lang, 'income')} {incomePct}%
+          </div>
+          <div
+            className="seg-pill cobalt"
+            style={{ width: `${Math.max(20, Math.min(54, expensePct))}%` }}
           >
-            <Plus size={14} />
-            <span>{t(lang, 'division')}</span>
-          </button>
+            {t(lang, 'expense')} {expensePct}%
+          </div>
+          <div className="seg-pill hatched" style={{ flex: 1 }}>
+            {t(lang, 'savingsRate')} {summary.savingsRate}%
+          </div>
         </div>
 
-        {/* Pill Search */}
-        <div className="search-pill-wrap">
-          <Search size={15} className="search-pill-icon" />
-          <input
-            type="search"
-            className="search-pill-input"
-            placeholder={t(lang, 'searchPlaceholder')}
-            aria-label={t(lang, 'note')}
-            value={filters.searchQuery}
-            onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
-          />
-        </div>
+        <div className="hero-big-stats">
+          <div className="hero-stat-item">
+            <span className="hero-stat-num" style={{ color: 'var(--income)' }}>
+              {formatCurrency(summary.totalIncome)}
+            </span>
+            <span className="hero-stat-label">
+              <Wallet size={13} /> {t(lang, 'totalIncome')}
+            </span>
+          </div>
 
-        {/* Primary Royal Blue Pill CTA */}
-        <button type="button" className="btn-primary" onClick={() => openAddModal()}>
-          <Plus size={17} />
-          <span>{t(lang, 'addEntry')}</span>
-        </button>
+          <div className="hero-stat-item">
+            <span className="hero-stat-num" style={{ color: 'var(--accent)' }}>
+              {formatCurrency(summary.totalExpense)}
+            </span>
+            <span className="hero-stat-label">
+              <Layers size={13} /> {t(lang, 'totalExpense')}
+            </span>
+          </div>
+
+          <div className="hero-stat-item">
+            <span className="hero-stat-num">{summary.transactionCount}</span>
+            <span className="hero-stat-label">
+              <Receipt size={13} /> {t(lang, 'transactionsCount')}
+            </span>
+          </div>
+        </div>
       </div>
     </section>
   );
