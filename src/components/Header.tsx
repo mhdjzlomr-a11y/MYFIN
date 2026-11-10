@@ -8,7 +8,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
-  ShieldCheck,
   Sun,
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
@@ -62,10 +61,6 @@ export function Header({
               <div>
                 <h1 className="brand-title">
                   <span>{t(lang, 'appName')}</span>
-                  <span className="offline-pill">
-                    <ShieldCheck size={11} />
-                    {t(lang, 'offlineReady')}
-                  </span>
                 </h1>
                 <p className="brand-subtitle">{t(lang, 'appTagline')}</p>
               </div>

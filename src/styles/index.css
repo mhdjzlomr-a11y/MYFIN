@@ -6,68 +6,67 @@
   --radius-pill: 999px;
   --transition: 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* AIZCRM Light Theme Twin: Crisp Alabaster + Matte Charcoal + Emerald Mint */
-  --bg-app: linear-gradient(135deg, #f6f8f9 0%, #eff2f5 55%, #e8ecef 100%);
-  --bg-app-solid: #eff2f5;
-  --bg-shell-panel: rgba(255, 255, 255, 0.85);
-  --bg-surface: #ffffff;
-  --bg-elevated: #f4f6f8;
-  --bg-hover: #eaeef2;
-  --bg-track: #e4e8ec;
-  --text-primary: #181a1d;
-  --text-secondary: #495057;
-  --text-muted: #7a828c;
-  --border-color: rgba(24, 26, 29, 0.09);
-  --shadow-sm: 0 4px 16px rgba(24, 26, 29, 0.04);
-  --shadow-md: 0 14px 36px rgba(24, 26, 29, 0.1);
+  /* Crextio Ice-Blue + Deep Navy + Cobalt Blue Palette (Normal / Light Theme) */
+  --bg-app: linear-gradient(135deg, #f2f6fc 0%, #e4eefb 50%, #d8e6f8 100%);
+  --bg-app-solid: #e8f0fb;
+  --bg-shell-panel: rgba(255, 255, 255, 0.72);
+  --bg-surface: rgba(255, 255, 255, 0.94);
+  --bg-elevated: #f3f7fd;
+  --bg-hover: #e7effb;
+  --bg-track: #e6edf7;
+  --text-primary: #10203a;
+  --text-secondary: #3c4f6b;
+  --text-muted: #6e819d;
+  --border-color: rgba(19, 49, 92, 0.1);
+  --shadow-sm: 0 4px 16px rgba(19, 49, 92, 0.05);
+  --shadow-md: 0 14px 36px rgba(19, 49, 92, 0.09);
 
-  /* Brand & Semantic Accents from AIZCRM Reference */
-  --navy-deep: #15b57b;
-  --navy-card: linear-gradient(165deg, #26292e 0%, #181a1d 100%);
-  --onyx-pill: #15b57b;
+  /* Brand & Semantic Accents from Crextio Reference */
+  --navy-deep: #13315c;
+  --navy-card: linear-gradient(165deg, #173a6e 0%, #0f264a 100%);
+  --onyx-pill: #13315c;
   --onyx-pill-text: #ffffff;
-  --accent: #15b57b;
-  --accent-hover: #109d6a;
-  --accent-soft: rgba(21, 181, 123, 0.14);
-  --income: #15b57b;
-  --income-soft: rgba(21, 181, 123, 0.14);
-  --expense: #ef4444;
-  --expense-soft: rgba(239, 68, 68, 0.12);
-  --balance: #2e7cf6;
-  --balance-soft: rgba(46, 124, 246, 0.12);
-  --ice-card: linear-gradient(145deg, #19c486 0%, #119c69 58%, #0c7850 100%);
+  --accent: #1c7eff;
+  --accent-hover: #0d68e6;
+  --accent-soft: rgba(28, 126, 255, 0.13);
+  --income: #0fa968;
+  --income-soft: rgba(15, 169, 104, 0.13);
+  --expense: #e5484d;
+  --expense-soft: rgba(229, 72, 77, 0.12);
+  --balance: #13315c;
+  --balance-soft: rgba(19, 49, 92, 0.1);
+  --ice-card: linear-gradient(145deg, #3b8ee8 0%, #1e62b5 58%, #154482 100%);
 }
 
 [data-theme='dark'] {
-  /* AIZCRM Direct Dark Theme: Matte Charcoal + Emerald Mint */
-  --bg-app: linear-gradient(135deg, #141618 0%, #181a1d 55%, #1c1f22 100%);
-  --bg-app-solid: #16181b;
-  --bg-shell-panel: rgba(34, 37, 41, 0.85);
-  --bg-surface: #202327;
-  --bg-elevated: #282c31;
-  --bg-hover: #30353b;
-  --bg-track: #2e3238;
-  --text-primary: #f8fafc;
-  --text-secondary: #cfd5dc;
-  --text-muted: #8f97a1;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.42);
-  --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.55);
+  --bg-app: linear-gradient(135deg, #070d18 0%, #0c1729 55%, #101f36 100%);
+  --bg-app-solid: #0a1220;
+  --bg-shell-panel: rgba(16, 29, 50, 0.72);
+  --bg-surface: #122038;
+  --bg-elevated: #182a48;
+  --bg-hover: #21375c;
+  --bg-track: #1f3354;
+  --text-primary: #f1f6fd;
+  --text-secondary: #c5d6ee;
+  --text-muted: #8ea7c9;
+  --border-color: rgba(148, 184, 232, 0.15);
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.45);
 
-  --navy-deep: #19c486;
-  --navy-card: linear-gradient(165deg, #272b30 0%, #1b1e22 100%);
-  --onyx-pill: #19c486;
+  --navy-deep: #3b91ff;
+  --navy-card: linear-gradient(165deg, #16325e 0%, #0b1b36 100%);
+  --onyx-pill: #1c7eff;
   --onyx-pill-text: #ffffff;
-  --accent: #19c486;
-  --accent-hover: #24d897;
-  --accent-soft: rgba(25, 196, 134, 0.18);
-  --income: #19c486;
-  --income-soft: rgba(25, 196, 134, 0.17);
-  --expense: #f05252;
-  --expense-soft: rgba(240, 82, 82, 0.17);
-  --balance: #3b82f6;
-  --balance-soft: rgba(59, 130, 246, 0.18);
-  --ice-card: linear-gradient(145deg, #19c486 0%, #119866 60%, #0b6f4a 100%);
+  --accent: #3b91ff;
+  --accent-hover: #5aa3ff;
+  --accent-soft: rgba(59, 145, 255, 0.18);
+  --income: #2dd494;
+  --income-soft: rgba(45, 212, 148, 0.16);
+  --expense: #f87171;
+  --expense-soft: rgba(248, 113, 113, 0.16);
+  --balance: #60a5fa;
+  --balance-soft: rgba(96, 165, 250, 0.18);
+  --ice-card: linear-gradient(145deg, #1e6fe0 0%, #15458a 58%, #0f2952 100%);
 }
 
 * {
@@ -249,7 +248,7 @@ button {
 }
 
 [data-theme='dark'] .app-header {
-  background: rgba(22, 24, 27, 0.88);
+  background: rgba(10, 18, 32, 0.8);
 }
 
 .header-inner {
@@ -277,7 +276,7 @@ button {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #19c486, #0f8f61);
+  background: linear-gradient(135deg, #13315c, #1c7eff);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -393,7 +392,7 @@ button {
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
-  box-shadow: 0 6px 18px rgba(21, 181, 123, 0.28);
+  box-shadow: 0 6px 18px rgba(28, 126, 255, 0.28);
   transition: all var(--transition);
 }
 
@@ -410,7 +409,7 @@ button {
   padding: 10px 18px;
   border-radius: var(--radius-pill);
   border: none;
-  background: #202327;
+  background: #13315c;
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
@@ -418,7 +417,7 @@ button {
 }
 
 .btn-navy:hover {
-  background: #2c3036;
+  background: #1b447e;
   transform: translateY(-1px);
 }
 
@@ -570,20 +569,20 @@ button {
 }
 
 .seg-pill.navy {
-  background: #222529;
+  background: #13315c;
   color: #ffffff;
 }
 
 .seg-pill.cobalt {
-  background: #19c486;
+  background: #1c7eff;
   color: #ffffff;
 }
 
 .seg-pill.hatched {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(25, 196, 134, 0.1),
-    rgba(25, 196, 134, 0.1) 5px,
+    rgba(19, 49, 92, 0.08),
+    rgba(19, 49, 92, 0.08) 5px,
     transparent 5px,
     transparent 10px
   );
@@ -847,8 +846,8 @@ button {
 }
 
 .navy-mini-btn:hover {
-  background: #19c486;
-  border-color: #19c486;
+  background: #1c7eff;
+  border-color: #1c7eff;
 }
 
 .navy-mini-btn.danger:hover {
@@ -1504,7 +1503,7 @@ button {
   font-size: 0.88rem;
   box-shadow: var(--shadow-md);
   color: #fff;
-  background: #15b57b;
+  background: #13315c;
 }
 
 .toast-banner.error {
@@ -1531,7 +1530,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 2px solid #15b57b;
+  border-bottom: 2px solid #13315c;
   padding-bottom: 12px;
   margin-bottom: 16px;
 }
