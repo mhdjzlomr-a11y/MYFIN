@@ -23,8 +23,8 @@ export function ChartsSection() {
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
 
-  const textColor = isDark ? '#c2d6d3' : '#455a64';
-  const gridColor = isDark ? 'rgba(108, 196, 140, 0.14)' : 'rgba(46, 90, 112, 0.08)';
+  const textColor = isDark ? '#cfd5dc' : '#495057';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(24, 26, 29, 0.07)';
 
   const timeSeries = useMemo(
     () =>
@@ -50,7 +50,7 @@ export function ChartsSection() {
         {
           label: t(lang, 'income'),
           data: timeSeries.income,
-          backgroundColor: '#62c083',
+          backgroundColor: '#19c486',
           borderRadius: 10,
           borderSkipped: false as const,
           maxBarThickness: 32,
@@ -58,7 +58,7 @@ export function ChartsSection() {
         {
           label: t(lang, 'expense'),
           data: timeSeries.expense,
-          backgroundColor: isDark ? '#7dc0cb' : '#2e5a70',
+          backgroundColor: isDark ? '#3b82f6' : '#222529',
           borderRadius: 10,
           borderSkipped: false as const,
           maxBarThickness: 32,
@@ -78,7 +78,7 @@ export function ChartsSection() {
           labels: { color: textColor, boxWidth: 10, usePointStyle: true, pointStyle: 'circle', padding: 14 },
         },
         tooltip: {
-          backgroundColor: '#1b2428',
+          backgroundColor: '#181a1d',
           padding: 12,
           cornerRadius: 12,
           callbacks: {
@@ -111,9 +111,9 @@ export function ChartsSection() {
         {
           data: expenseCategories.map((r) => r.expense),
           backgroundColor: expenseCategories.map((r, i) =>
-            i === 0 ? '#62c083' : i === 1 ? '#2e5a70' : i === 2 ? '#8db8bc' : r.category.color,
+            i === 0 ? '#19c486' : i === 1 ? '#2e7cf6' : i === 2 ? '#f05252' : r.category.color,
           ),
-          borderColor: isDark ? '#132328' : '#ffffff',
+          borderColor: isDark ? '#202327' : '#ffffff',
           borderWidth: 3,
           hoverOffset: 8,
         },
