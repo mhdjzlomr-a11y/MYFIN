@@ -6,67 +6,67 @@
   --radius-pill: 999px;
   --transition: 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Periwinkle-Iris + Coral-Pink + Cool Lavender-White Palette (Normal Theme) */
-  --bg-app: linear-gradient(135deg, #f8f8fd 0%, #f1f2fa 55%, #e8eaf7 100%);
-  --bg-app-solid: #f0f1fa;
-  --bg-shell-panel: rgba(255, 255, 255, 0.84);
+  /* Sage-Mint + Ocean Slate-Teal + Soft Alabaster Palette (Normal Theme) */
+  --bg-app: linear-gradient(135deg, #f5f8f7 0%, #edf4f2 55%, #e5efec 100%);
+  --bg-app-solid: #edf4f2;
+  --bg-shell-panel: rgba(255, 255, 255, 0.8);
   --bg-surface: #ffffff;
-  --bg-elevated: #f5f5fb;
-  --bg-hover: #ececf8;
-  --bg-track: #e8e9f5;
-  --text-primary: #26243d;
-  --text-secondary: #5a5778;
-  --text-muted: #8a87a6;
-  --border-color: rgba(100, 93, 194, 0.11);
-  --shadow-sm: 0 4px 16px rgba(38, 36, 61, 0.04);
-  --shadow-md: 0 14px 36px rgba(100, 93, 194, 0.13);
+  --bg-elevated: #f3f8f6;
+  --bg-hover: #e6f0ed;
+  --bg-track: #e3ece9;
+  --text-primary: #16262e;
+  --text-secondary: #455a64;
+  --text-muted: #748a8f;
+  --border-color: rgba(46, 90, 112, 0.1);
+  --shadow-sm: 0 4px 16px rgba(46, 90, 112, 0.05);
+  --shadow-md: 0 14px 36px rgba(46, 90, 112, 0.11);
 
-  /* Brand & Semantic Accents from Iris-Pink Reference */
-  --navy-deep: #5850be;
-  --navy-card: linear-gradient(160deg, #6e67d6 0%, #564fb8 58%, #4740a1 100%);
-  --onyx-pill: #645dc2;
+  /* Brand & Semantic Accents from Sage-Teal Reference */
+  --navy-deep: #2e5a70;
+  --navy-card: linear-gradient(165deg, #3c6f87 0%, #264d61 100%);
+  --onyx-pill: #5cb97d;
   --onyx-pill-text: #ffffff;
-  --accent: #645dc2;
-  --accent-hover: #524bae;
-  --accent-soft: rgba(100, 93, 194, 0.13);
-  --income: #1fc77e;
-  --income-soft: rgba(31, 199, 126, 0.14);
-  --expense: #fa547c;
-  --expense-soft: rgba(250, 84, 124, 0.13);
-  --balance: #645dc2;
-  --balance-soft: rgba(100, 93, 194, 0.12);
-  --ice-card: linear-gradient(145deg, #ff7d9a 0%, #fa547c 58%, #e63e68 100%);
+  --accent: #5cb97d;
+  --accent-hover: #4ba66c;
+  --accent-soft: rgba(92, 185, 125, 0.15);
+  --income: #3ea86b;
+  --income-soft: rgba(62, 168, 107, 0.14);
+  --expense: #e05a5a;
+  --expense-soft: rgba(224, 90, 90, 0.12);
+  --balance: #3a6b82;
+  --balance-soft: rgba(58, 107, 130, 0.13);
+  --ice-card: linear-gradient(145deg, #6cc48c 0%, #438391 58%, #2e5a70 100%);
 }
 
 [data-theme='dark'] {
-  --bg-app: linear-gradient(135deg, #0c0b16 0%, #131124 55%, #191630 100%);
-  --bg-app-solid: #100f1e;
-  --bg-shell-panel: rgba(24, 22, 44, 0.82);
-  --bg-surface: #18162c;
-  --bg-elevated: #211e3b;
-  --bg-hover: #2a274a;
-  --bg-track: #262344;
-  --text-primary: #f6f6fc;
-  --text-secondary: #cdcbe6;
-  --text-muted: #9693b8;
-  --border-color: rgba(126, 119, 230, 0.18);
+  --bg-app: linear-gradient(135deg, #0a1214 0%, #0f1c20 55%, #14252b 100%);
+  --bg-app-solid: #0d171a;
+  --bg-shell-panel: rgba(19, 35, 40, 0.8);
+  --bg-surface: #132328;
+  --bg-elevated: #1a2e35;
+  --bg-hover: #213a42;
+  --bg-track: #20373f;
+  --text-primary: #f1f7f6;
+  --text-secondary: #c2d6d3;
+  --text-muted: #88a4a2;
+  --border-color: rgba(108, 196, 140, 0.16);
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.38);
   --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.5);
 
-  --navy-deep: #8d87ef;
-  --navy-card: linear-gradient(160deg, #5c54c4 0%, #3d3691 100%);
-  --onyx-pill: #726be0;
+  --navy-deep: #72cf94;
+  --navy-card: linear-gradient(165deg, #2b5468 0%, #193441 100%);
+  --onyx-pill: #5cb97d;
   --onyx-pill-text: #ffffff;
-  --accent: #7e77e6;
-  --accent-hover: #9690f0;
-  --accent-soft: rgba(126, 119, 230, 0.2);
-  --income: #34d399;
-  --income-soft: rgba(52, 211, 153, 0.16);
-  --expense: #ff6b8b;
-  --expense-soft: rgba(255, 107, 139, 0.18);
-  --balance: #a5a0f5;
-  --balance-soft: rgba(165, 160, 245, 0.18);
-  --ice-card: linear-gradient(145deg, #f45b7f 0%, #d43862 60%, #a8254a 100%);
+  --accent: #68c98b;
+  --accent-hover: #82d6a0;
+  --accent-soft: rgba(104, 201, 139, 0.18);
+  --income: #5ad48e;
+  --income-soft: rgba(90, 212, 142, 0.16);
+  --expense: #f87171;
+  --expense-soft: rgba(248, 113, 113, 0.16);
+  --balance: #7dc0cb;
+  --balance-soft: rgba(125, 192, 203, 0.18);
+  --ice-card: linear-gradient(145deg, #4b9e76 0%, #2f6578 60%, #1e4252 100%);
 }
 
 * {
@@ -248,7 +248,7 @@ button {
 }
 
 [data-theme='dark'] .app-header {
-  background: rgba(16, 15, 30, 0.84);
+  background: rgba(13, 23, 26, 0.84);
 }
 
 .header-inner {
@@ -276,7 +276,7 @@ button {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #645dc2, #fa547c);
+  background: linear-gradient(135deg, #5cb97d, #3a6b82);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -392,7 +392,7 @@ button {
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
-  box-shadow: 0 6px 18px rgba(100, 93, 194, 0.28);
+  box-shadow: 0 6px 18px rgba(92, 185, 125, 0.28);
   transition: all var(--transition);
 }
 
@@ -409,7 +409,7 @@ button {
   padding: 10px 18px;
   border-radius: var(--radius-pill);
   border: none;
-  background: #5850be;
+  background: #2e5a70;
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
@@ -417,7 +417,7 @@ button {
 }
 
 .btn-navy:hover {
-  background: #6e67d6;
+  background: #3a6b82;
   transform: translateY(-1px);
 }
 
@@ -569,20 +569,20 @@ button {
 }
 
 .seg-pill.navy {
-  background: #645dc2;
+  background: #2e5a70;
   color: #ffffff;
 }
 
 .seg-pill.cobalt {
-  background: #fa547c;
+  background: #62c083;
   color: #ffffff;
 }
 
 .seg-pill.hatched {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(100, 93, 194, 0.09),
-    rgba(100, 93, 194, 0.09) 5px,
+    rgba(46, 90, 112, 0.09),
+    rgba(46, 90, 112, 0.09) 5px,
     transparent 5px,
     transparent 10px
   );
@@ -846,8 +846,8 @@ button {
 }
 
 .navy-mini-btn:hover {
-  background: #fa547c;
-  border-color: #fa547c;
+  background: #5cb97d;
+  border-color: #5cb97d;
 }
 
 .navy-mini-btn.danger:hover {
@@ -1503,7 +1503,7 @@ button {
   font-size: 0.88rem;
   box-shadow: var(--shadow-md);
   color: #fff;
-  background: #645dc2;
+  background: #2e5a70;
 }
 
 .toast-banner.error {
@@ -1530,7 +1530,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 2px solid #645dc2;
+  border-bottom: 2px solid #2e5a70;
   padding-bottom: 12px;
   margin-bottom: 16px;
 }
