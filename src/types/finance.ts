@@ -95,3 +95,27 @@ export interface FinanceBackupPayload {
   categories: Category[];
   settings?: AppSettings;
 }
+
+export interface FirebaseSyncConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+  appId: string;
+}
+
+export type CloudSyncStatus =
+  | 'unconfigured'
+  | 'signed_out'
+  | 'connecting'
+  | 'syncing'
+  | 'synced'
+  | 'error';
+
+export interface CloudUser {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL: string;
+}

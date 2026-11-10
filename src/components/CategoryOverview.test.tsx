@@ -105,5 +105,24 @@ describe('MYFIN App integration', () => {
       'Categories and Divisions unified summary',
     );
     expect(within(categorySection).getByTestId('selected-breakdown-panel')).toHaveTextContent('Food');
+
+    // Open Gmail Cloud Sync modal from top header button
+    fireEvent.click(screen.getByLabelText(/Gmail Cloud Sync/i));
+    const syncDialog = await screen.findByRole('dialog', { name: /Gmail Cloud Sync/i });
+    const configTextarea = within(syncDialog).getByLabelText(/Paste Firebase Config/i);
+    expect(configTextarea).toBeInTheDocument();
+
+    fireEvent.change(configTextarea, {
+      target: {
+        value: JSON.stringify({
+          apiKey: 'AIzaTestKey123',
+          authDomain: 'myfin-test.firebaseapp.com',
+          projectId: 'myfin-test',
+          appId: '1:123:web:abc',
+        }),
+      },
+    });
+    fireEvent.submit(configTextarea.closest('form')!);
+    expect(await within(syncDialog).findByText(/Sign in with Google/i)).toBeInTheDocument();
   });
 });

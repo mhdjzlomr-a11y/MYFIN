@@ -1,6 +1,7 @@
 import {
   BarChart3,
   ChevronDown,
+  Cloud,
   FolderKanban,
   Globe,
   LayoutDashboard,
@@ -34,11 +35,14 @@ export function Header({
     settings,
     summary,
     activeTab,
+    cloudUser,
+    syncStatus,
     setActiveTab,
     toggleTheme,
     toggleLanguage,
     resetFilters,
     openAddModal,
+    openSyncModal,
   } = useFinance();
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
@@ -93,6 +97,47 @@ export function Header({
               title={isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
             >
               {isDark ? <Sun size={16} color="#facc15" /> : <Moon size={16} />}
+            </button>
+
+            <button
+              type="button"
+              className="header-square-btn"
+              style={{ position: 'relative' }}
+              onClick={openSyncModal}
+              aria-label={t(lang, 'cloudSyncTitle')}
+              title={
+                cloudUser
+                  ? `${t(lang, 'cloudSyncConnectedAs')}: ${cloudUser.email}`
+                  : t(lang, 'cloudSyncTitle')
+              }
+            >
+              <Cloud
+                size={16}
+                color={
+                  cloudUser
+                    ? 'var(--income)'
+                    : syncStatus === 'error'
+                      ? 'var(--expense)'
+                      : 'currentColor'
+                }
+              />
+              <span
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: 6,
+                  right: 6,
+                  width: 7,
+                  height: 7,
+                  borderRadius: '999px',
+                  background: cloudUser
+                    ? '#10b981'
+                    : syncStatus === 'error'
+                      ? '#ef4444'
+                      : '#f59e0b',
+                  border: '1.5px solid var(--bg-surface)',
+                }}
+              />
             </button>
 
             <button

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CategoryOverview } from './components/CategoryOverview';
 import { ChartsSection } from './components/ChartsSection';
+import { CloudSyncModal } from './components/CloudSyncModal';
 import { DashboardBento } from './components/DashboardBento';
 import { FilterBar } from './components/FilterBar';
 import { Header, LeftSidebar } from './components/Header';
@@ -66,6 +67,7 @@ function FinanceWorkspace() {
       <PrintableReportSheet className="print-only-report" />
 
       <TransactionModal />
+      <CloudSyncModal />
 
       {toast && (
         <div

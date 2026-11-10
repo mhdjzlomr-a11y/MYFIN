@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DEFAULT_CATEGORIES,
   DEFAULT_DIVISIONS,
@@ -12,6 +12,18 @@ import {
   computeSummary,
   filterTransactions,
 } from '../services/analytics';
+import {
+  clearFirebaseConfig,
+  loadSavedFirebaseConfig,
+  mergeLocalWithCloudOnSignIn,
+  saveFirebaseConfig,
+  signInWithGoogleCloud,
+  signOutGoogleCloud,
+  subscribeAuthUser,
+  subscribeCloudFinanceData,
+  syncEntityDelete,
+  syncEntityUpsert,
+} from '../services/cloudSync';
 import {
   buildBackupPayload,
   loadFinanceState,
@@ -27,10 +39,13 @@ import type {
   Category,
   CategorySummaryRow,
   CategoryType,
+  CloudSyncStatus,
+  CloudUser,
   DivisionSummaryRow,
   FilterState,
   FinanceDivision,
   FinanceSummary,
+  FirebaseSyncConfig,
   Transaction,
   TransactionType,
 } from '../types/finance';
@@ -101,6 +116,26 @@ interface FinanceContextValue {
   importBackupJson: (jsonText: string) => boolean;
   clearAllData: () => void;
   showToast: (keyOrText: TranslationKey | string, kind?: 'success' | 'error', isLiteral?: boolean) => void;
+  isSyncModalOpen: boolean;
+  openSyncModal: () => void;
+  closeSyncModal: () => void;
+  syncConfig: FirebaseSyncConfig | null;
+  cloudUser: CloudUser | null;
+  syncStatus: CloudSyncStatus;
+  syncError: string | null;
+  saveAndConnectCloudConfig: (config: FirebaseSyncConfig) => void;
+  disconnectAndClearCloudConfig: () => void;
+  signInWithGoogle: () => Promise<void>;
+  signOutGoogle: () => Promise<void>;
+  forceSyncNow: () => Promise<void>;
+}
+
+function sortTransactionsNewest(list: Transaction[]): Transaction[] {
+  return [...list].sort((a, b) => {
+    const byDate = b.date.localeCompare(a.date);
+    if (byDate !== 0) return byDate;
+    return (b.createdAt ?? '').localeCompare(a.createdAt ?? '');
+  });
 }
 
 const INITIAL_FILTERS: FilterState = {
@@ -136,6 +171,22 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<{ id: number; text: string; kind: 'success' | 'error' } | null>(
     null,
   );
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [syncConfig, setSyncConfig] = useState<FirebaseSyncConfig | null>(() =>
+    loadSavedFirebaseConfig(),
+  );
+  const [cloudUser, setCloudUser] = useState<CloudUser | null>(null);
+  const [syncStatus, setSyncStatus] = useState<CloudSyncStatus>(() =>
+    syncConfig ? 'signed_out' : 'unconfigured',
+  );
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  const transactionsRef = useRef(transactions);
+  transactionsRef.current = transactions;
+  const divisionsRef = useRef(divisions);
+  divisionsRef.current = divisions;
+  const categoriesRef = useRef(categories);
+  categoriesRef.current = categories;
 
   useEffect(() => {
     let active = true;
@@ -156,6 +207,155 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-theme', settings.theme);
     document.documentElement.setAttribute('lang', settings.language);
   }, [settings.theme, settings.language]);
+
+  const handleSyncFailure = useCallback((err: unknown) => {
+    const message = err instanceof Error ? err.message : String(err);
+    setSyncError(message);
+    setSyncStatus('error');
+  }, []);
+
+  useEffect(() => {
+    if (!syncConfig) {
+      setCloudUser(null);
+      setSyncStatus('unconfigured');
+      return;
+    }
+
+    let active = true;
+    let unsub: (() => void) | undefined;
+
+    setSyncStatus((prev) => (prev === 'synced' || prev === 'syncing' ? prev : 'connecting'));
+
+    subscribeAuthUser(
+      syncConfig,
+      (user) => {
+        if (!active) return;
+        setCloudUser(user);
+        setSyncError(null);
+        if (!user) {
+          setSyncStatus('signed_out');
+        }
+      },
+      (message) => {
+        if (!active) return;
+        setSyncError(message);
+        setSyncStatus('error');
+      },
+    )
+      .then((unsubscribe) => {
+        if (!active) {
+          unsubscribe();
+          return;
+        }
+        unsub = unsubscribe;
+      })
+      .catch((err) => {
+        if (active) handleSyncFailure(err);
+      });
+
+    return () => {
+      active = false;
+      unsub?.();
+    };
+  }, [syncConfig, handleSyncFailure]);
+
+  useEffect(() => {
+    if (!isReady || !syncConfig || !cloudUser) return;
+
+    let active = true;
+    let unsubData: (() => void) | undefined;
+
+    const applyMergedState = (merged: {
+      transactions: Transaction[];
+      divisions: FinanceDivision[];
+      categories: Category[];
+    }) => {
+      const sortedTxs = sortTransactionsNewest(merged.transactions);
+      setTransactions(sortedTxs);
+      setDivisions(merged.divisions);
+      setCategories(merged.categories);
+      void saveTransactions(sortedTxs);
+      void saveDivisions(merged.divisions);
+      void saveCategories(merged.categories);
+    };
+
+    setSyncStatus('syncing');
+    setSyncError(null);
+
+    mergeLocalWithCloudOnSignIn(syncConfig, cloudUser.uid, {
+      transactions: transactionsRef.current,
+      divisions: divisionsRef.current,
+      categories: categoriesRef.current,
+    })
+      .then(async (merged) => {
+        if (!active) return;
+        applyMergedState(merged);
+
+        const unsubscribe = await subscribeCloudFinanceData(syncConfig, cloudUser.uid, {
+          onTransactions: (items) => {
+            if (!active) return;
+            const sorted = sortTransactionsNewest(items);
+            setTransactions(sorted);
+            void saveTransactions(sorted);
+            setSyncStatus('synced');
+          },
+          onDivisions: (items) => {
+            if (!active) return;
+            setDivisions(items);
+            void saveDivisions(items);
+            setSyncStatus('synced');
+          },
+          onCategories: (items) => {
+            if (!active) return;
+            setCategories(items);
+            void saveCategories(items);
+            setSyncStatus('synced');
+          },
+          onError: (msg) => {
+            if (!active) return;
+            setSyncError(msg);
+            setSyncStatus('error');
+          },
+        });
+
+        if (!active) {
+          unsubscribe();
+          return;
+        }
+        unsubData = unsubscribe;
+        setSyncStatus('synced');
+      })
+      .catch((err) => {
+        if (active) handleSyncFailure(err);
+      });
+
+    return () => {
+      active = false;
+      unsubData?.();
+    };
+  }, [isReady, syncConfig, cloudUser, handleSyncFailure]);
+
+  const syncUpsertIfConnected = useCallback(
+    (
+      collectionName: 'transactions' | 'divisions' | 'categories',
+      id: string,
+      payload: Transaction | FinanceDivision | Category,
+    ) => {
+      if (!syncConfig || !cloudUser) return;
+      void syncEntityUpsert(syncConfig, cloudUser.uid, collectionName, id, payload).catch(
+        handleSyncFailure,
+      );
+    },
+    [syncConfig, cloudUser, handleSyncFailure],
+  );
+
+  const syncDeleteIfConnected = useCallback(
+    (collectionName: 'transactions' | 'divisions' | 'categories', id: string) => {
+      if (!syncConfig || !cloudUser) return;
+      void syncEntityDelete(syncConfig, cloudUser.uid, collectionName, id).catch(handleSyncFailure);
+    },
+    [syncConfig, cloudUser, handleSyncFailure],
+  );
 
   const showToast = useCallback(
     (keyOrText: TranslationKey | string, kind: 'success' | 'error' = 'success', isLiteral = false) => {
@@ -227,22 +427,30 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         void saveTransactions(next);
         return next;
       });
+      syncUpsertIfConnected('transactions', created.id, created);
       showToast('toastSaved');
     },
-    [showToast],
+    [showToast, syncUpsertIfConnected],
   );
 
   const updateTransaction = useCallback(
     (id: string, input: NewTransactionInput) => {
       const now = new Date().toISOString();
+      const existing = transactionsRef.current.find((tx) => tx.id === id);
+      const updatedTx: Transaction | null = existing
+        ? { ...existing, ...input, updatedAt: now }
+        : null;
       setTransactions((prev) => {
         const next = prev.map((tx) => (tx.id === id ? { ...tx, ...input, updatedAt: now } : tx));
         void saveTransactions(next);
         return next;
       });
+      if (updatedTx) {
+        syncUpsertIfConnected('transactions', id, updatedTx);
+      }
       showToast('toastUpdated');
     },
-    [showToast],
+    [showToast, syncUpsertIfConnected],
   );
 
   const deleteTransaction = useCallback(
@@ -252,9 +460,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         void saveTransactions(next);
         return next;
       });
+      syncDeleteIfConnected('transactions', id);
       showToast('toastDeleted');
     },
-    [showToast],
+    [showToast, syncDeleteIfConnected],
   );
 
   const addCategory = useCallback(
@@ -274,10 +483,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         void saveCategories(next);
         return next;
       });
+      syncUpsertIfConnected('categories', created.id, created);
       showToast('toastCategoryAdded');
       return created;
     },
-    [showToast],
+    [showToast, syncUpsertIfConnected],
   );
 
   const deleteCategory = useCallback(
@@ -288,19 +498,28 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       }
       const nextCategories = categories.filter((c) => c.id !== id);
       const fallbackId = nextCategories[0]?.id ?? '';
+      const now = new Date().toISOString();
       setCategories(nextCategories);
       void saveCategories(nextCategories);
+      syncDeleteIfConnected('categories', id);
+
+      const impacted = transactionsRef.current
+        .filter((tx) => tx.categoryId === id)
+        .map((tx) => ({ ...tx, categoryId: fallbackId, updatedAt: now }));
 
       setTransactions((prev) => {
         const updated = prev.map((tx) =>
-          tx.categoryId === id ? { ...tx, categoryId: fallbackId } : tx,
+          tx.categoryId === id ? { ...tx, categoryId: fallbackId, updatedAt: now } : tx,
         );
         void saveTransactions(updated);
         return updated;
       });
+      for (const tx of impacted) {
+        syncUpsertIfConnected('transactions', tx.id, tx);
+      }
       showToast('toastDeleted');
     },
-    [categories, showToast],
+    [categories, showToast, syncDeleteIfConnected, syncUpsertIfConnected],
   );
 
   const addDivision = useCallback(
@@ -319,10 +538,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         void saveDivisions(next);
         return next;
       });
+      syncUpsertIfConnected('divisions', created.id, created);
       showToast('toastDivisionAdded');
       return created;
     },
-    [showToast],
+    [showToast, syncUpsertIfConnected],
   );
 
   const deleteDivision = useCallback(
@@ -333,19 +553,28 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       }
       const nextDivisions = divisions.filter((d) => d.id !== id);
       const fallbackId = nextDivisions[0]?.id ?? '';
+      const now = new Date().toISOString();
       setDivisions(nextDivisions);
       void saveDivisions(nextDivisions);
+      syncDeleteIfConnected('divisions', id);
+
+      const impacted = transactionsRef.current
+        .filter((tx) => tx.divisionId === id)
+        .map((tx) => ({ ...tx, divisionId: fallbackId, updatedAt: now }));
 
       setTransactions((prev) => {
         const updated = prev.map((tx) =>
-          tx.divisionId === id ? { ...tx, divisionId: fallbackId } : tx,
+          tx.divisionId === id ? { ...tx, divisionId: fallbackId, updatedAt: now } : tx,
         );
         void saveTransactions(updated);
         return updated;
       });
+      for (const tx of impacted) {
+        syncUpsertIfConnected('transactions', tx.id, tx);
+      }
       showToast('toastDeleted');
     },
-    [divisions, showToast],
+    [divisions, showToast, syncDeleteIfConnected, syncUpsertIfConnected],
   );
 
   const loadSampleData = useCallback(() => {
@@ -355,8 +584,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       void saveTransactions(next);
       return next;
     });
+    for (const tx of samples) {
+      syncUpsertIfConnected('transactions', tx.id, tx);
+    }
     showToast('toastSampleLoaded');
-  }, [showToast]);
+  }, [showToast, syncUpsertIfConnected]);
 
   const exportBackupJson = useCallback(() => {
     const payload = buildBackupPayload({
@@ -385,21 +617,110 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setSettings(parsed.settings);
         void saveSettings(parsed.settings);
       }
+      for (const d of parsed.divisions) {
+        syncUpsertIfConnected('divisions', d.id, d);
+      }
+      for (const c of parsed.categories) {
+        syncUpsertIfConnected('categories', c.id, c);
+      }
+      for (const tx of parsed.transactions) {
+        syncUpsertIfConnected('transactions', tx.id, tx);
+      }
       showToast('toastBackupImported');
       return true;
     },
-    [showToast],
+    [showToast, syncUpsertIfConnected],
   );
 
   const clearAllData = useCallback(() => {
+    const oldTxIds = transactionsRef.current.map((tx) => tx.id);
+    const customDivIds = divisionsRef.current.filter((d) => d.isCustom).map((d) => d.id);
+    const customCatIds = categoriesRef.current.filter((c) => c.isCustom).map((c) => c.id);
+
     setTransactions([]);
     setDivisions(DEFAULT_DIVISIONS);
     setCategories(DEFAULT_CATEGORIES);
     void saveTransactions([]);
     void saveDivisions(DEFAULT_DIVISIONS);
     void saveCategories(DEFAULT_CATEGORIES);
+
+    for (const id of oldTxIds) syncDeleteIfConnected('transactions', id);
+    for (const id of customDivIds) syncDeleteIfConnected('divisions', id);
+    for (const id of customCatIds) syncDeleteIfConnected('categories', id);
+
     showToast('toastDeleted');
-  }, [showToast]);
+  }, [showToast, syncDeleteIfConnected]);
+
+  const openSyncModal = useCallback(() => setIsSyncModalOpen(true), []);
+  const closeSyncModal = useCallback(() => setIsSyncModalOpen(false), []);
+
+  const saveAndConnectCloudConfig = useCallback(
+    (config: FirebaseSyncConfig) => {
+      saveFirebaseConfig(config);
+      setSyncError(null);
+      setSyncConfig(config);
+      setSyncStatus('connecting');
+      showToast('cloudSyncSuccess');
+    },
+    [showToast],
+  );
+
+  const disconnectAndClearCloudConfig = useCallback(() => {
+    if (syncConfig) {
+      void signOutGoogleCloud(syncConfig).catch(() => undefined);
+    }
+    clearFirebaseConfig();
+    setCloudUser(null);
+    setSyncConfig(null);
+    setSyncError(null);
+    setSyncStatus('unconfigured');
+  }, [syncConfig]);
+
+  const signInWithGoogle = useCallback(async () => {
+    if (!syncConfig) return;
+    setSyncError(null);
+    setSyncStatus('connecting');
+    try {
+      await signInWithGoogleCloud(syncConfig);
+    } catch (err) {
+      handleSyncFailure(err);
+    }
+  }, [syncConfig, handleSyncFailure]);
+
+  const signOutGoogle = useCallback(async () => {
+    if (!syncConfig) return;
+    try {
+      await signOutGoogleCloud(syncConfig);
+      setCloudUser(null);
+      setSyncError(null);
+      setSyncStatus('signed_out');
+    } catch (err) {
+      handleSyncFailure(err);
+    }
+  }, [syncConfig, handleSyncFailure]);
+
+  const forceSyncNow = useCallback(async () => {
+    if (!syncConfig || !cloudUser) return;
+    setSyncStatus('syncing');
+    setSyncError(null);
+    try {
+      const merged = await mergeLocalWithCloudOnSignIn(syncConfig, cloudUser.uid, {
+        transactions: transactionsRef.current,
+        divisions: divisionsRef.current,
+        categories: categoriesRef.current,
+      });
+      const sortedTxs = sortTransactionsNewest(merged.transactions);
+      setTransactions(sortedTxs);
+      setDivisions(merged.divisions);
+      setCategories(merged.categories);
+      void saveTransactions(sortedTxs);
+      void saveDivisions(merged.divisions);
+      void saveCategories(merged.categories);
+      setSyncStatus('synced');
+    } catch (err) {
+      handleSyncFailure(err);
+    }
+  }, [syncConfig, cloudUser, handleSyncFailure]);
 
   const filteredTransactions = useMemo(
     () => filterTransactions(transactions, filters, categories, divisions),
@@ -454,6 +775,18 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     importBackupJson,
     clearAllData,
     showToast,
+    isSyncModalOpen,
+    openSyncModal,
+    closeSyncModal,
+    syncConfig,
+    cloudUser,
+    syncStatus,
+    syncError,
+    saveAndConnectCloudConfig,
+    disconnectAndClearCloudConfig,
+    signInWithGoogle,
+    signOutGoogle,
+    forceSyncNow,
   };
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

@@ -1,4 +1,5 @@
 import {
+  Cloud,
   Download,
   FileDown,
   FileSpreadsheet,
@@ -152,9 +153,11 @@ export function ReportsExport() {
     divisions,
     categorySummary,
     settings,
+    cloudUser,
     exportBackupJson,
     importBackupJson,
     clearAllData,
+    openSyncModal,
     showToast,
   } = useFinance();
 
@@ -310,6 +313,11 @@ export function ReportsExport() {
           >
             <Upload size={16} />
             <span>{t(lang, 'importJson')}</span>
+          </button>
+
+          <button type="button" className="btn-secondary" onClick={openSyncModal}>
+            <Cloud size={16} />
+            <span>{cloudUser ? t(lang, 'cloudSyncActive') : t(lang, 'cloudSyncTitle')}</span>
           </button>
 
           <input
