@@ -22,20 +22,20 @@
   --shadow-md: 0 14px 36px rgba(19, 49, 92, 0.09);
 
   /* Brand & Semantic Accents from Crextio Reference */
-  --navy-deep: #13315c;
-  --navy-card: linear-gradient(165deg, #173a6e 0%, #0f264a 100%);
-  --onyx-pill: #13315c;
+  --navy-deep: #1e40af;
+  --navy-card: linear-gradient(165deg, #2358b0 0%, #173c82 100%);
+  --onyx-pill: #1d4ed8;
   --onyx-pill-text: #ffffff;
-  --accent: #1c7eff;
-  --accent-hover: #0d68e6;
-  --accent-soft: rgba(28, 126, 255, 0.13);
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-soft: rgba(2, 132, 199, 0.13);
   --income: #0fa968;
   --income-soft: rgba(15, 169, 104, 0.13);
   --expense: #e5484d;
   --expense-soft: rgba(229, 72, 77, 0.12);
-  --balance: #13315c;
-  --balance-soft: rgba(19, 49, 92, 0.1);
-  --ice-card: linear-gradient(145deg, #1c7eff 0%, #1558c4 55%, #13315c 100%);
+  --balance: #1d4ed8;
+  --balance-soft: rgba(29, 78, 216, 0.1);
+  --ice-card: linear-gradient(145deg, #0ea5e9 0%, #2563eb 100%);
 }
 
 [data-theme='dark'] {
@@ -53,20 +53,20 @@
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.45);
 
-  --navy-deep: #1c7eff;
-  --navy-card: linear-gradient(165deg, #16325e 0%, #0b1b36 100%);
-  --onyx-pill: #1c7eff;
+  --navy-deep: #38bdf8;
+  --navy-card: linear-gradient(165deg, #1d468c 0%, #122d5e 100%);
+  --onyx-pill: #2563eb;
   --onyx-pill-text: #ffffff;
-  --accent: #3b91ff;
-  --accent-hover: #5aa3ff;
-  --accent-soft: rgba(59, 145, 255, 0.18);
+  --accent: #38bdf8;
+  --accent-hover: #7dd3fc;
+  --accent-soft: rgba(56, 189, 248, 0.18);
   --income: #2dd494;
   --income-soft: rgba(45, 212, 148, 0.16);
   --expense: #f87171;
   --expense-soft: rgba(248, 113, 113, 0.16);
   --balance: #60a5fa;
   --balance-soft: rgba(96, 165, 250, 0.18);
-  --ice-card: linear-gradient(145deg, #1e6fe0 0%, #15458a 58%, #0f2952 100%);
+  --ice-card: linear-gradient(145deg, #0284c7 0%, #1d4ed8 100%);
 }
 
 * {
@@ -569,12 +569,12 @@ button {
 }
 
 .seg-pill.navy {
-  background: #13315c;
+  background: #1d4ed8;
   color: #ffffff;
 }
 
 .seg-pill.cobalt {
-  background: #1c7eff;
+  background: #0ea5e9;
   color: #ffffff;
 }
 
