@@ -23,8 +23,8 @@ export function ChartsSection() {
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
 
-  const textColor = isDark ? '#cbc9e6' : '#4e4c6b';
-  const gridColor = isDark ? 'rgba(143, 132, 247, 0.14)' : 'rgba(24, 23, 38, 0.07)';
+  const textColor = isDark ? '#cdcbe6' : '#5a5778';
+  const gridColor = isDark ? 'rgba(126, 119, 230, 0.14)' : 'rgba(100, 93, 194, 0.08)';
 
   const timeSeries = useMemo(
     () =>
@@ -50,7 +50,7 @@ export function ChartsSection() {
         {
           label: t(lang, 'income'),
           data: timeSeries.income,
-          backgroundColor: isDark ? '#7a6df0' : '#181828',
+          backgroundColor: '#645dc2',
           borderRadius: 10,
           borderSkipped: false as const,
           maxBarThickness: 32,
@@ -58,7 +58,7 @@ export function ChartsSection() {
         {
           label: t(lang, 'expense'),
           data: timeSeries.expense,
-          backgroundColor: '#5b4ce6',
+          backgroundColor: '#fa547c',
           borderRadius: 10,
           borderSkipped: false as const,
           maxBarThickness: 32,
@@ -78,7 +78,7 @@ export function ChartsSection() {
           labels: { color: textColor, boxWidth: 10, usePointStyle: true, pointStyle: 'circle', padding: 14 },
         },
         tooltip: {
-          backgroundColor: '#181828',
+          backgroundColor: '#26243d',
           padding: 12,
           cornerRadius: 12,
           callbacks: {
@@ -111,9 +111,9 @@ export function ChartsSection() {
         {
           data: expenseCategories.map((r) => r.expense),
           backgroundColor: expenseCategories.map((r, i) =>
-            i === 0 ? '#181828' : i === 1 ? '#5b4ce6' : i === 2 ? '#8f84f7' : r.category.color,
+            i === 0 ? '#645dc2' : i === 1 ? '#fa547c' : i === 2 ? '#1fc77e' : r.category.color,
           ),
-          borderColor: isDark ? '#161626' : '#ffffff',
+          borderColor: isDark ? '#18162c' : '#ffffff',
           borderWidth: 3,
           hoverOffset: 8,
         },
