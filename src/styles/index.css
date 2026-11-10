@@ -653,15 +653,15 @@ button {
 
 /* Left Ice-Blue Balance Spotlight Card (Crextio Alex Chen Card Feel) */
 .ice-spotlight-card {
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--ice-card);
-  padding: 20px;
+  padding: 14px 16px;
   color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 215px;
-  box-shadow: var(--shadow-md);
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
 }
@@ -681,15 +681,15 @@ button {
 .ice-balance-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: 5px;
+  padding: 5px 11px;
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.26);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.45);
   color: #ffffff;
-  font-weight: 800;
-  font-size: 0.92rem;
+  font-weight: 700;
+  font-size: 0.78rem;
 }
 
 /* Division Accordion List (Crextio Pension/Devices Card Feel) */

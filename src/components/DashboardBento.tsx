@@ -232,16 +232,13 @@ export function DashboardBento() {
       {/* COLUMN 1: Ice-Blue Balance Spotlight + Finance Divisions List */}
       <div className="crextio-col">
         <section className="ice-spotlight-card" aria-label="Balance spotlight">
-          <div>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, opacity: 0.9 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.9 }}>
               {activeDivision ? `${activeDivision.icon} ${getLocalizedName(activeDivision, lang)}` : t(lang, 'allDivisions')}
             </span>
-            <h3 style={{ margin: '4px 0 0', fontSize: '1.2rem', fontWeight: 800 }}>
-              {t(lang, 'netBalance')}
-            </h3>
-            <p style={{ margin: '2px 0 0', fontSize: '0.78rem', opacity: 0.88 }}>
-              {t(lang, 'categoryUnifiedTitle').split('—')[0]}
-            </p>
+            <span style={{ fontSize: '0.72rem', opacity: 0.88 }}>
+              {summary.transactionCount} {t(lang, 'entriesCount')}
+            </span>
           </div>
 
           <div
@@ -250,15 +247,14 @@ export function DashboardBento() {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 10,
-              marginTop: 18,
             }}
           >
             <div>
-              <div style={{ fontSize: '1.35rem', fontWeight: 800 }}>
-                {formatCurrency(summary.balance)}
+              <div style={{ fontSize: '0.76rem', fontWeight: 700, opacity: 0.9 }}>
+                {t(lang, 'netBalance')}
               </div>
-              <div style={{ fontSize: '0.72rem', opacity: 0.9 }}>
-                {summary.transactionCount} {t(lang, 'entriesCount')}
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, lineHeight: 1.2 }}>
+                {formatCurrency(summary.balance)}
               </div>
             </div>
 
@@ -268,7 +264,7 @@ export function DashboardBento() {
               onClick={() => setActiveTab('categories')}
             >
               <span>{t(lang, 'navCategories')}</span>
-              <ArrowUpRight size={15} />
+              <ArrowUpRight size={14} />
             </button>
           </div>
         </section>
