@@ -180,7 +180,7 @@ export function TransactionModal() {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="responsive-grid-2">
             <div className="field-group">
               <label className="field-label" htmlFor="tx-amount">
                 {t(lang, 'amount')}

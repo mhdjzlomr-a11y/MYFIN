@@ -58,7 +58,7 @@ export function Header({
     <>
       <header className="app-header no-print">
         <div className="header-inner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="header-brand-left">
             <button
               type="button"
               className="sidebar-toggle-btn header-square-btn"
@@ -86,7 +86,7 @@ export function Header({
             >
               <Globe size={15} />
               <span>{lang === 'ml' ? 'English' : 'മലയാളം'}</span>
-              <ChevronDown size={14} />
+              <ChevronDown size={14} className="header-lang-chevron" />
             </button>
 
             <button

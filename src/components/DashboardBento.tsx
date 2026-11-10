@@ -456,14 +456,7 @@ export function DashboardBento() {
           </div>
 
           {filters.preset === 'custom' && (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-                marginBottom: 14,
-              }}
-            >
+            <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
               <div className="field-group">
                 <label className="field-label" htmlFor="bento-from-date">
                   {t(lang, 'fromDate')}
