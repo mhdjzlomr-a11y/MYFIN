@@ -17,76 +17,76 @@ export function Header() {
   const { settings, activeTab, setActiveTab, toggleTheme, toggleLanguage, openAddModal } =
     useFinance();
   const lang = settings.language;
+  const isDark = settings.theme === 'dark';
 
   const navItems: Array<{ id: ActiveTab; label: string; icon: JSX.Element }> = [
-    { id: 'dashboard', label: t(lang, 'navDashboard'), icon: <LayoutDashboard size={17} /> },
-    { id: 'categories', label: t(lang, 'navCategories'), icon: <FolderKanban size={17} /> },
-    { id: 'transactions', label: t(lang, 'navTransactions'), icon: <ListOrdered size={17} /> },
-    { id: 'reports', label: t(lang, 'navReports'), icon: <BarChart3 size={17} /> },
+    { id: 'dashboard', label: t(lang, 'navDashboard'), icon: <LayoutDashboard size={16} /> },
+    { id: 'categories', label: t(lang, 'navCategories'), icon: <FolderKanban size={16} /> },
+    { id: 'transactions', label: t(lang, 'navTransactions'), icon: <ListOrdered size={16} /> },
+    { id: 'reports', label: t(lang, 'navReports'), icon: <BarChart3 size={16} /> },
   ];
 
   return (
     <>
       <header className="app-header no-print">
         <div className="header-inner">
-          <div className="brand-group">
-            <div className="brand-logo" aria-hidden="true">
-              ₹
+          <div className="header-left">
+            <div className="brand-group">
+              <div className="brand-logo" aria-hidden="true">
+                ₹
+              </div>
+              <div>
+                <h1 className="brand-title">
+                  <span>{t(lang, 'appName')}</span>
+                  <span className="offline-pill">
+                    <ShieldCheck size={11} />
+                    {t(lang, 'offlineReady')}
+                  </span>
+                </h1>
+                <p className="brand-subtitle">{t(lang, 'appTagline')}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="brand-title">
-                <span>{t(lang, 'appName')}</span>
-                <span className="offline-pill">
-                  <ShieldCheck size={12} />
-                  {t(lang, 'offlineReady')}
-                </span>
-              </h1>
-              <p className="brand-subtitle">{t(lang, 'appTagline')}</p>
-            </div>
+
+            <nav className="desktop-nav" aria-label="Main navigation">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`nav-btn ${activeTab === item.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(item.id)}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
 
-          <nav className="desktop-nav" aria-label="Main navigation">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`nav-btn ${activeTab === item.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(item.id)}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
-
           <div className="header-actions">
+            {/* Explicit English / Malayalam Switch Pill */}
             <button
               type="button"
               className="icon-btn"
               onClick={toggleLanguage}
-              title="Switch Language"
+              title={t(lang, 'switchLang')}
+              aria-label={t(lang, 'switchLang')}
             >
-              <Languages size={17} />
-              <span>{t(lang, 'switchLang')}</span>
+              <Languages size={16} color="var(--accent)" />
+              <span>{lang === 'ml' ? 'English' : 'മലയാളം'}</span>
             </button>
 
+            {/* Explicit Dark Theme / Normal Theme Switch Pill */}
             <button
               type="button"
               className="icon-btn"
               onClick={toggleTheme}
-              aria-label={settings.theme === 'dark' ? t(lang, 'lightMode') : t(lang, 'darkMode')}
-              title={settings.theme === 'dark' ? t(lang, 'lightMode') : t(lang, 'darkMode')}
+              aria-label={isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
+              title={isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
             >
-              {settings.theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-            </button>
-
-            <button
-              type="button"
-              className="btn-primary header-add-btn"
-              onClick={() => openAddModal()}
-            >
-              <Plus size={18} />
-              <span>{t(lang, 'addEntry')}</span>
+              {isDark ? <Sun size={16} color="#facc15" /> : <Moon size={16} color="var(--accent)" />}
+              <span className="theme-btn-label">
+                {isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
+              </span>
             </button>
           </div>
         </div>

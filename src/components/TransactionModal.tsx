@@ -1,4 +1,4 @@
-import { Plus, X } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { COLOR_PALETTE, EMOJI_CHOICES } from '../data/defaults';
@@ -17,6 +17,7 @@ export function TransactionModal() {
     settings,
     addTransaction,
     updateTransaction,
+    deleteTransaction,
     addCategory,
     addDivision,
     showToast,
@@ -360,13 +361,33 @@ export function TransactionModal() {
             />
           </div>
 
-          <div className="actions-toolbar" style={{ justifyContent: 'flex-end', marginTop: 4 }}>
-            <button type="button" className="btn-secondary" onClick={closeTxModal}>
-              {t(lang, 'cancel')}
-            </button>
-            <button type="submit" className="btn-primary">
-              {t(lang, 'save')}
-            </button>
+          <div className="actions-toolbar" style={{ justifyContent: 'space-between', marginTop: 4 }}>
+            {editingTransaction ? (
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={() => {
+                  if (window.confirm(t(lang, 'confirmDeleteTx'))) {
+                    deleteTransaction(editingTransaction.id);
+                    closeTxModal();
+                  }
+                }}
+              >
+                <Trash2 size={15} />
+                <span>{t(lang, 'delete')}</span>
+              </button>
+            ) : (
+              <span />
+            )}
+
+            <div className="actions-toolbar">
+              <button type="button" className="btn-secondary" onClick={closeTxModal}>
+                {t(lang, 'cancel')}
+              </button>
+              <button type="submit" className="btn-primary">
+                {t(lang, 'save')}
+              </button>
+            </div>
           </div>
         </form>
       </div>

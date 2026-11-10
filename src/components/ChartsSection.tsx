@@ -23,8 +23,8 @@ export function ChartsSection() {
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
 
-  const textColor = isDark ? '#cbd5e1' : '#334155';
-  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(15, 23, 42, 0.08)';
+  const textColor = isDark ? '#cbd5e1' : '#475467';
+  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(17, 19, 21, 0.06)';
 
   const timeSeries = useMemo(
     () =>
@@ -50,20 +50,22 @@ export function ChartsSection() {
         {
           label: t(lang, 'income'),
           data: timeSeries.income,
-          backgroundColor: isDark ? 'rgba(52, 211, 153, 0.85)' : 'rgba(5, 150, 105, 0.85)',
-          borderRadius: 6,
-          maxBarThickness: 42,
+          backgroundColor: '#0ac775',
+          borderRadius: 12,
+          borderSkipped: false as const,
+          maxBarThickness: 36,
         },
         {
           label: t(lang, 'expense'),
           data: timeSeries.expense,
-          backgroundColor: isDark ? 'rgba(248, 113, 113, 0.85)' : 'rgba(220, 38, 38, 0.85)',
-          borderRadius: 6,
-          maxBarThickness: 42,
+          backgroundColor: '#0b66ff',
+          borderRadius: 12,
+          borderSkipped: false as const,
+          maxBarThickness: 36,
         },
       ],
     }),
-    [timeSeries, lang, isDark],
+    [timeSeries, lang],
   );
 
   const barOptions: ChartOptions<'bar'> = useMemo(
@@ -73,9 +75,12 @@ export function ChartsSection() {
       plugins: {
         legend: {
           position: 'top',
-          labels: { color: textColor, boxWidth: 12, padding: 14 },
+          labels: { color: textColor, boxWidth: 10, usePointStyle: true, pointStyle: 'circle', padding: 14 },
         },
         tooltip: {
+          backgroundColor: '#111315',
+          padding: 12,
+          cornerRadius: 12,
           callbacks: {
             label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(Number(ctx.raw ?? 0))}`,
           },
@@ -105,9 +110,11 @@ export function ChartsSection() {
       datasets: [
         {
           data: expenseCategories.map((r) => r.expense),
-          backgroundColor: expenseCategories.map((r) => r.category.color),
-          borderColor: isDark ? '#111827' : '#ffffff',
-          borderWidth: 2,
+          backgroundColor: expenseCategories.map((r, i) =>
+            i === 0 ? '#0b66ff' : i === 1 ? '#0ac775' : r.category.color,
+          ),
+          borderColor: isDark ? '#161a23' : '#ffffff',
+          borderWidth: 3,
           hoverOffset: 8,
         },
       ],

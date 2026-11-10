@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit3, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { COLOR_PALETTE, EMOJI_CHOICES } from '../data/defaults';
@@ -19,6 +19,8 @@ export function CategoryOverview() {
     addDivision,
     deleteDivision,
     openAddModal,
+    openEditModal,
+    deleteTransaction,
     showToast,
   } = useFinance();
 
@@ -381,6 +383,7 @@ export function CategoryOverview() {
                     <th>{mode === 'category' ? t(lang, 'division') : t(lang, 'category')}</th>
                     <th>{t(lang, 'note')}</th>
                     <th>{t(lang, 'amount')}</th>
+                    <th>{t(lang, 'actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -403,6 +406,32 @@ export function CategoryOverview() {
                           }}
                         >
                           {formatCurrency(tx.type === 'expense' ? -tx.amount : tx.amount, true)}
+                        </td>
+                        <td>
+                          <div className="row-actions">
+                            <button
+                              type="button"
+                              className="mini-icon-btn"
+                              title={t(lang, 'edit')}
+                              aria-label={t(lang, 'edit')}
+                              onClick={() => openEditModal(tx)}
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              className="mini-icon-btn danger"
+                              title={t(lang, 'delete')}
+                              aria-label={t(lang, 'delete')}
+                              onClick={() => {
+                                if (window.confirm(t(lang, 'confirmDeleteTx'))) {
+                                  deleteTransaction(tx.id);
+                                }
+                              }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

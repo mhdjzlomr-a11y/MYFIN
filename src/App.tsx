@@ -1,11 +1,13 @@
 import { CategoryOverview } from './components/CategoryOverview';
 import { ChartsSection } from './components/ChartsSection';
+import { DashboardBento } from './components/DashboardBento';
 import { FilterBar } from './components/FilterBar';
 import { Header } from './components/Header';
 import { PrintableReportSheet, ReportsExport } from './components/ReportsExport';
 import { SummaryCards } from './components/SummaryCards';
 import { TransactionList } from './components/TransactionList';
 import { TransactionModal } from './components/TransactionModal';
+import { WorkspaceHero } from './components/WorkspaceHero';
 import { FinanceProvider, useFinance } from './context/FinanceContext';
 
 function FinanceWorkspace() {
@@ -16,24 +18,20 @@ function FinanceWorkspace() {
       <Header />
 
       <main className="main-container no-print">
-        <FilterBar />
+        <WorkspaceHero />
 
-        {activeTab === 'dashboard' && (
-          <>
-            <SummaryCards />
-            <ChartsSection />
-            <TransactionList maxItems={8} />
-          </>
-        )}
+        {activeTab === 'dashboard' && <DashboardBento />}
 
         {activeTab === 'categories' && (
           <>
+            <FilterBar />
             <CategoryOverview />
           </>
         )}
 
         {activeTab === 'transactions' && (
           <>
+            <FilterBar />
             <SummaryCards />
             <TransactionList />
           </>
@@ -41,6 +39,7 @@ function FinanceWorkspace() {
 
         {activeTab === 'reports' && (
           <>
+            <FilterBar />
             <SummaryCards />
             <ChartsSection />
             <ReportsExport />

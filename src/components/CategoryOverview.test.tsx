@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
 
 describe('MYFIN App integration', () => {
@@ -7,7 +7,8 @@ describe('MYFIN App integration', () => {
     localStorage.clear();
   });
 
-  it('records a transaction and displays unified Income, Expense, Balance & custom Category/Division management', async () => {
+  it('records a transaction, displays unified Category/Division summary, and supports deleting an entry', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
     render(<App />);
 
     expect(await screen.findByText('MYFIN')).toBeInTheDocument();
@@ -61,9 +62,21 @@ describe('MYFIN App integration', () => {
     });
     fireEvent.click(within(categorySection).getByText('ചേർക്കുക'));
     expect((await within(categorySection).findAllByText('യാത്രാ ഫണ്ട്')).length).toBeGreaterThan(0);
+
+    // Switch back to Dashboard and verify direct Delete on the entry works
+    fireEvent.click(screen.getAllByText('ഡാഷ്ബോർഡ്')[0]);
+    const txSection = await screen.findByLabelText('Transactions list');
+    const deleteBtn = within(txSection).getByLabelText('നീക്കം ചെയ്യുക');
+    fireEvent.click(deleteBtn);
+
+    await waitFor(() => {
+      expect(within(txSection).queryByText('ഉച്ചഭക്ഷണം')).not.toBeInTheDocument();
+    });
+
+    confirmSpy.mockRestore();
   });
 
-  it('supports Reports export buttons, Dark/Light theme toggle, and Malayalam/English switch', async () => {
+  it('supports Reports export buttons, Dark/Normal theme toggle, and Malayalam/English switch', async () => {
     render(<App />);
     expect(await screen.findByText('MYFIN')).toBeInTheDocument();
 
