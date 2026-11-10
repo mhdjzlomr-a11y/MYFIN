@@ -7,10 +7,12 @@ import {
 } from '../data/defaults';
 import { t, type TranslationKey } from '../i18n/translations';
 import {
+  buildStoredPeriodReport,
   computeCategorySummary,
   computeDivisionSummary,
   computeSummary,
   filterTransactions,
+  getPeriodTransactions,
 } from '../services/analytics';
 import {
   clearFirebaseConfig,
@@ -28,6 +30,7 @@ import {
   buildBackupPayload,
   loadFinanceState,
   parseBackupPayload,
+  saveArchives,
   saveCategories,
   saveDivisions,
   saveSettings,
@@ -36,6 +39,7 @@ import {
 import type {
   ActiveTab,
   AppSettings,
+  ArchivePeriodType,
   Category,
   CategorySummaryRow,
   CategoryType,
@@ -46,6 +50,7 @@ import type {
   FinanceDivision,
   FinanceSummary,
   FirebaseSyncConfig,
+  StoredPeriodReport,
   Transaction,
   TransactionType,
 } from '../types/finance';
@@ -128,6 +133,14 @@ interface FinanceContextValue {
   signInWithGoogle: () => Promise<void>;
   signOutGoogle: () => Promise<void>;
   forceSyncNow: () => Promise<void>;
+  archives: StoredPeriodReport[];
+  storePeriodReport: (periodType: ArchivePeriodType) => StoredPeriodReport | null;
+  startNewPeriod: (periodType: ArchivePeriodType) => void;
+  deleteStoredReport: (id: string) => void;
+}
+
+function sortArchivesNewest(list: StoredPeriodReport[]): StoredPeriodReport[] {
+  return [...list].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
 }
 
 function sortTransactionsNewest(list: Transaction[]): Transaction[] {
@@ -162,6 +175,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [divisions, setDivisions] = useState<FinanceDivision[]>(DEFAULT_DIVISIONS);
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [archives, setArchives] = useState<StoredPeriodReport[]>([]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
@@ -187,6 +201,8 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   divisionsRef.current = divisions;
   const categoriesRef = useRef(categories);
   categoriesRef.current = categories;
+  const archivesRef = useRef(archives);
+  archivesRef.current = archives;
 
   useEffect(() => {
     let active = true;
@@ -195,6 +211,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       setTransactions(loaded.transactions);
       setDivisions(loaded.divisions);
       setCategories(loaded.categories);
+      setArchives(sortArchivesNewest(loaded.archives));
       setSettings(loaded.settings);
       setIsReady(true);
     });
@@ -269,14 +286,18 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       transactions: Transaction[];
       divisions: FinanceDivision[];
       categories: Category[];
+      archives: StoredPeriodReport[];
     }) => {
       const sortedTxs = sortTransactionsNewest(merged.transactions);
+      const sortedArcs = sortArchivesNewest(merged.archives);
       setTransactions(sortedTxs);
       setDivisions(merged.divisions);
       setCategories(merged.categories);
+      setArchives(sortedArcs);
       void saveTransactions(sortedTxs);
       void saveDivisions(merged.divisions);
       void saveCategories(merged.categories);
+      void saveArchives(sortedArcs);
     };
 
     setSyncStatus('syncing');
@@ -286,6 +307,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       transactions: transactionsRef.current,
       divisions: divisionsRef.current,
       categories: categoriesRef.current,
+      archives: archivesRef.current,
     })
       .then(async (merged) => {
         if (!active) return;
@@ -309,6 +331,13 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
             if (!active) return;
             setCategories(items);
             void saveCategories(items);
+            setSyncStatus('synced');
+          },
+          onArchives: (items) => {
+            if (!active) return;
+            const sorted = sortArchivesNewest(items);
+            setArchives(sorted);
+            void saveArchives(sorted);
             setSyncStatus('synced');
           },
           onError: (msg) => {
@@ -337,9 +366,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   const syncUpsertIfConnected = useCallback(
     (
-      collectionName: 'transactions' | 'divisions' | 'categories',
+      collectionName: 'transactions' | 'divisions' | 'categories' | 'archives',
       id: string,
-      payload: Transaction | FinanceDivision | Category,
+      payload: Transaction | FinanceDivision | Category | StoredPeriodReport,
     ) => {
       if (!syncConfig || !cloudUser) return;
       void syncEntityUpsert(syncConfig, cloudUser.uid, collectionName, id, payload).catch(
@@ -350,7 +379,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   );
 
   const syncDeleteIfConnected = useCallback(
-    (collectionName: 'transactions' | 'divisions' | 'categories', id: string) => {
+    (collectionName: 'transactions' | 'divisions' | 'categories' | 'archives', id: string) => {
       if (!syncConfig || !cloudUser) return;
       void syncEntityDelete(syncConfig, cloudUser.uid, collectionName, id).catch(handleSyncFailure);
     },
@@ -596,9 +625,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       divisions,
       categories,
       settings,
+      archives,
     });
     return JSON.stringify(payload, null, 2);
-  }, [transactions, divisions, categories, settings]);
+  }, [transactions, divisions, categories, settings, archives]);
 
   const importBackupJson = useCallback(
     (jsonText: string): boolean => {
@@ -607,12 +637,15 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         showToast('toastInvalidBackup', 'error');
         return false;
       }
+      const importedArchives = sortArchivesNewest(parsed.archives ?? []);
       setTransactions(parsed.transactions);
       setDivisions(parsed.divisions);
       setCategories(parsed.categories);
+      setArchives(importedArchives);
       void saveTransactions(parsed.transactions);
       void saveDivisions(parsed.divisions);
       void saveCategories(parsed.categories);
+      void saveArchives(importedArchives);
       if (parsed.settings) {
         setSettings(parsed.settings);
         void saveSettings(parsed.settings);
@@ -626,6 +659,9 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       for (const tx of parsed.transactions) {
         syncUpsertIfConnected('transactions', tx.id, tx);
       }
+      for (const arc of importedArchives) {
+        syncUpsertIfConnected('archives', arc.id, arc);
+      }
       showToast('toastBackupImported');
       return true;
     },
@@ -634,22 +670,105 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   const clearAllData = useCallback(() => {
     const oldTxIds = transactionsRef.current.map((tx) => tx.id);
+    const oldArcIds = archivesRef.current.map((a) => a.id);
     const customDivIds = divisionsRef.current.filter((d) => d.isCustom).map((d) => d.id);
     const customCatIds = categoriesRef.current.filter((c) => c.isCustom).map((c) => c.id);
 
     setTransactions([]);
     setDivisions(DEFAULT_DIVISIONS);
     setCategories(DEFAULT_CATEGORIES);
+    setArchives([]);
     void saveTransactions([]);
     void saveDivisions(DEFAULT_DIVISIONS);
     void saveCategories(DEFAULT_CATEGORIES);
+    void saveArchives([]);
 
     for (const id of oldTxIds) syncDeleteIfConnected('transactions', id);
+    for (const id of oldArcIds) syncDeleteIfConnected('archives', id);
     for (const id of customDivIds) syncDeleteIfConnected('divisions', id);
     for (const id of customCatIds) syncDeleteIfConnected('categories', id);
 
     showToast('toastDeleted');
   }, [showToast, syncDeleteIfConnected]);
+
+  const archiveAndPersistPeriod = useCallback(
+    (periodType: ArchivePeriodType): StoredPeriodReport | null => {
+      const report = buildStoredPeriodReport({
+        id: makeId('rep'),
+        periodType,
+        transactions: transactionsRef.current,
+        categories: categoriesRef.current,
+        divisions: divisionsRef.current,
+      });
+      if (report.transactionCount === 0) {
+        return null;
+      }
+      setArchives((prev) => {
+        const next = sortArchivesNewest([report, ...prev]);
+        void saveArchives(next);
+        return next;
+      });
+      syncUpsertIfConnected('archives', report.id, report);
+      return report;
+    },
+    [syncUpsertIfConnected],
+  );
+
+  const storePeriodReport = useCallback(
+    (periodType: ArchivePeriodType): StoredPeriodReport | null => {
+      const saved = archiveAndPersistPeriod(periodType);
+      if (!saved) {
+        showToast('toastNoEntriesToArchive', 'error');
+        return null;
+      }
+      showToast('toastReportStored');
+      return saved;
+    },
+    [archiveAndPersistPeriod, showToast],
+  );
+
+  const startNewPeriod = useCallback(
+    (periodType: ArchivePeriodType) => {
+      const { entries } = getPeriodTransactions(transactionsRef.current, periodType);
+      if (entries.length > 0) {
+        archiveAndPersistPeriod(periodType);
+        const removeIds = new Set(entries.map((tx) => tx.id));
+        setTransactions((prev) => {
+          const remaining = prev.filter((tx) => !removeIds.has(tx.id));
+          void saveTransactions(remaining);
+          return remaining;
+        });
+        for (const id of removeIds) {
+          syncDeleteIfConnected('transactions', id);
+        }
+      }
+      setFilters((prev) => ({
+        ...prev,
+        preset: periodType,
+        startDate: '',
+        endDate: '',
+        divisionId: 'all',
+        categoryId: 'all',
+        type: 'all',
+        searchQuery: '',
+      }));
+      showToast('toastNewPeriodStarted');
+    },
+    [archiveAndPersistPeriod, syncDeleteIfConnected, showToast],
+  );
+
+  const deleteStoredReport = useCallback(
+    (id: string) => {
+      setArchives((prev) => {
+        const next = prev.filter((a) => a.id !== id);
+        void saveArchives(next);
+        return next;
+      });
+      syncDeleteIfConnected('archives', id);
+      showToast('toastDeleted');
+    },
+    [syncDeleteIfConnected, showToast],
+  );
 
   const openSyncModal = useCallback(() => setIsSyncModalOpen(true), []);
   const closeSyncModal = useCallback(() => setIsSyncModalOpen(false), []);
@@ -708,14 +827,18 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         transactions: transactionsRef.current,
         divisions: divisionsRef.current,
         categories: categoriesRef.current,
+        archives: archivesRef.current,
       });
       const sortedTxs = sortTransactionsNewest(merged.transactions);
+      const sortedArcs = sortArchivesNewest(merged.archives);
       setTransactions(sortedTxs);
       setDivisions(merged.divisions);
       setCategories(merged.categories);
+      setArchives(sortedArcs);
       void saveTransactions(sortedTxs);
       void saveDivisions(merged.divisions);
       void saveCategories(merged.categories);
+      void saveArchives(sortedArcs);
       setSyncStatus('synced');
     } catch (err) {
       handleSyncFailure(err);
@@ -787,6 +910,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     signInWithGoogle,
     signOutGoogle,
     forceSyncNow,
+    archives,
+    storePeriodReport,
+    startNewPeriod,
+    deleteStoredReport,
   };
 
   return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;

@@ -125,4 +125,46 @@ describe('MYFIN App integration', () => {
     fireEvent.submit(configTextarea.closest('form')!);
     expect(await within(syncDialog).findByText(/Sign in with Google/i)).toBeInTheDocument();
   });
+
+  it('stores weekly and monthly reports and starts a fresh period cleanly', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(<App />);
+    expect((await screen.findAllByText('MYFIN')).length).toBeGreaterThan(0);
+
+    // Add a transaction for today (which falls in both this week and this month)
+    fireEvent.click(screen.getAllByText('പുതിയ ഇനം ചേർക്കുക')[0]);
+    const dialog = screen.getByRole('dialog');
+    fireEvent.change(within(dialog).getByLabelText(/തുക/i), { target: { value: '1200' } });
+    fireEvent.change(within(dialog).getByLabelText(/കുറിപ്പ്/i), { target: { value: 'മാസ ചെലവ്' } });
+    fireEvent.click(within(dialog).getByText('സേവ് ചെയ്യുക'));
+
+    await waitFor(() => {
+      const txSection = screen.getByLabelText('Transactions list');
+      expect(within(txSection).getByText('മാസ ചെലവ്')).toBeInTheDocument();
+    });
+
+    // Navigate to Reports via the quick Archive / Reset shortcut on Dashboard
+    fireEvent.click(screen.getByText('സ്റ്റോർ / പുതിയത്'));
+    const archiveSection = await screen.findByLabelText('ആഴ്ച / മാസം റിപ്പോർട്ട് സ്റ്റോർ & പുതിയ തുടക്കം');
+
+    // Store weekly report manually
+    const storeButtons = within(archiveSection).getAllByText('റിപ്പോർട്ട് സ്റ്റോർ ചെയ്യുക');
+    fireEvent.click(storeButtons[0]);
+    expect(await within(archiveSection).findByText('സ്റ്റോർ ചെയ്തു വെച്ച റിപ്പോർട്ടുകൾ (1)')).toBeInTheDocument();
+
+    // Start a fresh month (archives monthly total & clears active month entries)
+    fireEvent.click(within(archiveSection).getByText('പുതിയ മാസം തുടങ്ങുക'));
+    expect(await within(archiveSection).findByText('സ്റ്റോർ ചെയ്തു വെച്ച റിപ്പോർട്ടുകൾ (2)')).toBeInTheDocument();
+
+    // Expand details on stored report and confirm archived transaction is preserved
+    fireEvent.click(within(archiveSection).getAllByText('വിശദാംശം കാണുക')[0]);
+    expect(within(archiveSection).getByText('മാസ ചെലവ്')).toBeInTheDocument();
+
+    // Dashboard should now show ₹0 active balance for fresh month
+    fireEvent.click(screen.getAllByText('ഡാഷ്ബോർഡ്')[0]);
+    const txSection = await screen.findByLabelText('Transactions list');
+    expect(within(txSection).queryByText('മാസ ചെലവ്')).not.toBeInTheDocument();
+
+    confirmSpy.mockRestore();
+  });
 });

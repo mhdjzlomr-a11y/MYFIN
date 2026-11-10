@@ -3,6 +3,7 @@ import type {
   CloudUser,
   FinanceDivision,
   FirebaseSyncConfig,
+  StoredPeriodReport,
   Transaction,
 } from '../types/finance';
 
@@ -256,22 +257,26 @@ export async function mergeLocalWithCloudOnSignIn(
     transactions: Transaction[];
     divisions: FinanceDivision[];
     categories: Category[];
+    archives: StoredPeriodReport[];
   },
 ): Promise<{
   transactions: Transaction[];
   divisions: FinanceDivision[];
   categories: Category[];
+  archives: StoredPeriodReport[];
 }> {
   const { db, fsMod } = await getFirebaseClients(config);
 
   const txCol = fsMod.collection(db, 'users', uid, 'transactions');
   const divCol = fsMod.collection(db, 'users', uid, 'divisions');
   const catCol = fsMod.collection(db, 'users', uid, 'categories');
+  const arcCol = fsMod.collection(db, 'users', uid, 'archives');
 
-  const [txSnap, divSnap, catSnap] = await Promise.all([
+  const [txSnap, divSnap, catSnap, arcSnap] = await Promise.all([
     fsMod.getDocs(txCol),
     fsMod.getDocs(divCol),
     fsMod.getDocs(catCol),
+    fsMod.getDocs(arcCol),
   ]);
 
   const remoteTxs = new Map<string, Transaction>();
@@ -282,6 +287,9 @@ export async function mergeLocalWithCloudOnSignIn(
 
   const remoteCats = new Map<string, Category>();
   catSnap.forEach((d) => remoteCats.set(d.id, d.data() as Category));
+
+  const remoteArcs = new Map<string, StoredPeriodReport>();
+  arcSnap.forEach((d) => remoteArcs.set(d.id, d.data() as StoredPeriodReport));
 
   const pendingWrites: Array<{ ref: ReturnType<typeof fsMod.doc>; data: unknown }> = [];
 
@@ -307,6 +315,14 @@ export async function mergeLocalWithCloudOnSignIn(
     }
   }
 
+  for (const arc of localData.archives) {
+    const remote = remoteArcs.get(arc.id);
+    if (!remote || (arc.updatedAt && (!remote.updatedAt || arc.updatedAt > remote.updatedAt))) {
+      remoteArcs.set(arc.id, arc);
+      pendingWrites.push({ ref: fsMod.doc(arcCol, arc.id), data: arc });
+    }
+  }
+
   // Commit in chunks of 400 to respect Firestore 500-write batch limit
   for (let i = 0; i < pendingWrites.length; i += 400) {
     const batch = fsMod.writeBatch(db);
@@ -320,6 +336,7 @@ export async function mergeLocalWithCloudOnSignIn(
     transactions: Array.from(remoteTxs.values()),
     divisions: Array.from(remoteDivs.values()),
     categories: Array.from(remoteCats.values()),
+    archives: Array.from(remoteArcs.values()),
   };
 }
 
@@ -330,6 +347,7 @@ export async function subscribeCloudFinanceData(
     onTransactions: (items: Transaction[]) => void;
     onDivisions: (items: FinanceDivision[]) => void;
     onCategories: (items: Category[]) => void;
+    onArchives: (items: StoredPeriodReport[]) => void;
     onError: (msg: string) => void;
   },
 ): Promise<() => void> {
@@ -338,6 +356,7 @@ export async function subscribeCloudFinanceData(
   const txCol = fsMod.collection(db, 'users', uid, 'transactions');
   const divCol = fsMod.collection(db, 'users', uid, 'divisions');
   const catCol = fsMod.collection(db, 'users', uid, 'categories');
+  const arcCol = fsMod.collection(db, 'users', uid, 'archives');
 
   const unsubTx = fsMod.onSnapshot(
     txCol,
@@ -371,19 +390,30 @@ export async function subscribeCloudFinanceData(
     (err) => callbacks.onError(err.message),
   );
 
+  const unsubArc = fsMod.onSnapshot(
+    arcCol,
+    (snap) => {
+      const list: StoredPeriodReport[] = [];
+      snap.forEach((docSnap) => list.push(docSnap.data() as StoredPeriodReport));
+      callbacks.onArchives(list);
+    },
+    (err) => callbacks.onError(err.message),
+  );
+
   return () => {
     unsubTx();
     unsubDiv();
     unsubCat();
+    unsubArc();
   };
 }
 
 export async function syncEntityUpsert(
   config: FirebaseSyncConfig,
   uid: string,
-  collectionName: 'transactions' | 'divisions' | 'categories',
+  collectionName: 'transactions' | 'divisions' | 'categories' | 'archives',
   id: string,
-  payload: Transaction | FinanceDivision | Category,
+  payload: Transaction | FinanceDivision | Category | StoredPeriodReport,
 ): Promise<void> {
   const { db, fsMod } = await getFirebaseClients(config);
   await fsMod.setDoc(fsMod.doc(db, 'users', uid, collectionName, id), payload);
@@ -392,7 +422,7 @@ export async function syncEntityUpsert(
 export async function syncEntityDelete(
   config: FirebaseSyncConfig,
   uid: string,
-  collectionName: 'transactions' | 'divisions' | 'categories',
+  collectionName: 'transactions' | 'divisions' | 'categories' | 'archives',
   id: string,
 ): Promise<void> {
   const { db, fsMod } = await getFirebaseClients(config);

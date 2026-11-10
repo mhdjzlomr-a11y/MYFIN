@@ -3,6 +3,7 @@ export type CategoryType = 'income' | 'expense' | 'both';
 export type Language = 'ml' | 'en';
 export type Theme = 'light' | 'dark';
 export type DateFilterPreset = 'daily' | 'weekly' | 'monthly' | 'all' | 'custom';
+export type ArchivePeriodType = 'weekly' | 'monthly';
 export type ActiveTab = 'dashboard' | 'categories' | 'transactions' | 'reports';
 
 export interface FinanceDivision {
@@ -87,6 +88,36 @@ export interface TimeSeriesData {
   expense: number[];
 }
 
+export interface ArchivedBreakdownItem {
+  id: string;
+  nameMl: string;
+  nameEn: string;
+  icon: string;
+  color: string;
+  income: number;
+  expense: number;
+  balance: number;
+  count: number;
+  expenseSharePercent: number;
+}
+
+export interface StoredPeriodReport {
+  id: string;
+  periodType: ArchivePeriodType;
+  startDate: string;
+  endDate: string;
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  savingsRate: number;
+  transactionCount: number;
+  categoryBreakdown: ArchivedBreakdownItem[];
+  divisionBreakdown: ArchivedBreakdownItem[];
+  transactions: Transaction[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface FinanceBackupPayload {
   version: 1;
   exportedAt: string;
@@ -94,6 +125,7 @@ export interface FinanceBackupPayload {
   divisions: FinanceDivision[];
   categories: Category[];
   settings?: AppSettings;
+  archives?: StoredPeriodReport[];
 }
 
 export interface FirebaseSyncConfig {

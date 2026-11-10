@@ -1,5 +1,6 @@
 import { getLocalizedName } from '../i18n/translations';
 import type {
+  ArchivePeriodType,
   Category,
   CategorySummaryRow,
   DateFilterPreset,
@@ -8,6 +9,7 @@ import type {
   FinanceDivision,
   FinanceSummary,
   Language,
+  StoredPeriodReport,
   TimeSeriesData,
   Transaction,
 } from '../types/finance';
@@ -389,5 +391,84 @@ export function resolveNamesForDisplay(
   return {
     categoryName: getLocalizedName(cat, lang, lang === 'ml' ? 'മറ്റുള്ളവ' : 'Other'),
     divisionName: getLocalizedName(div, lang, lang === 'ml' ? 'പൊതുവായത്' : 'General'),
+  };
+}
+
+export function getPeriodTransactions(
+  transactions: Transaction[],
+  periodType: ArchivePeriodType,
+  referenceDate = new Date(),
+): { startDate: string; endDate: string; entries: Transaction[] } {
+  const { startDate, endDate } = resolveDateRange(periodType, '', '', referenceDate);
+  const entries = transactions
+    .filter((tx) => (!startDate || tx.date >= startDate) && (!endDate || tx.date <= endDate))
+    .sort((a, b) => {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return (b.createdAt ?? '').localeCompare(a.createdAt ?? '');
+    });
+  return { startDate, endDate, entries };
+}
+
+export function buildStoredPeriodReport(params: {
+  id: string;
+  periodType: ArchivePeriodType;
+  transactions: Transaction[];
+  categories: Category[];
+  divisions: FinanceDivision[];
+  referenceDate?: Date;
+}): StoredPeriodReport {
+  const ref = params.referenceDate ?? new Date();
+  const now = new Date().toISOString();
+  const { startDate, endDate, entries } = getPeriodTransactions(
+    params.transactions,
+    params.periodType,
+    ref,
+  );
+  const summary = computeSummary(entries);
+  const categoryBreakdown = computeCategorySummary(entries, params.categories)
+    .filter((row) => row.count > 0)
+    .map((row) => ({
+      id: row.category.id,
+      nameMl: row.category.nameMl,
+      nameEn: row.category.nameEn,
+      icon: row.category.icon,
+      color: row.category.color,
+      income: row.income,
+      expense: row.expense,
+      balance: row.balance,
+      count: row.count,
+      expenseSharePercent: row.expenseSharePercent,
+    }));
+
+  const divisionBreakdown = computeDivisionSummary(entries, params.divisions)
+    .filter((row) => row.count > 0)
+    .map((row) => ({
+      id: row.division.id,
+      nameMl: row.division.nameMl,
+      nameEn: row.division.nameEn,
+      icon: row.division.icon,
+      color: row.division.color,
+      income: row.income,
+      expense: row.expense,
+      balance: row.balance,
+      count: row.count,
+      expenseSharePercent: row.expenseSharePercent,
+    }));
+
+  return {
+    id: params.id,
+    periodType: params.periodType,
+    startDate,
+    endDate,
+    totalIncome: summary.totalIncome,
+    totalExpense: summary.totalExpense,
+    balance: summary.balance,
+    savingsRate: summary.savingsRate,
+    transactionCount: summary.transactionCount,
+    categoryBreakdown,
+    divisionBreakdown,
+    transactions: entries,
+    createdAt: now,
+    updatedAt: now,
   };
 }

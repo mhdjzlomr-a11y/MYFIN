@@ -10,6 +10,7 @@ import {
   type ChartOptions,
 } from 'chart.js';
 import {
+  Archive,
   ArrowUpRight,
   BarChart2,
   Calendar,
@@ -435,6 +436,16 @@ export function DashboardBento() {
                   <span>{p.label}</span>
                 </button>
               ))}
+
+              <button
+                type="button"
+                className="folder-tab-btn"
+                onClick={() => setActiveTab('reports')}
+                title={t(lang, 'periodArchiveTitle')}
+              >
+                <Archive size={13} />
+                <span>{t(lang, 'periodArchiveQuickNav')}</span>
+              </button>
             </div>
 
             <select

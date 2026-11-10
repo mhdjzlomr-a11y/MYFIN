@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CATEGORIES, DEFAULT_DIVISIONS } from '../data/defaults';
 import {
+  buildStoredPeriodReport,
   computeCategorySummary,
   computeDivisionSummary,
   computeSummary,
   computeTimeSeries,
   filterTransactions,
+  getPeriodTransactions,
   resolveDateRange,
 } from './analytics';
 import type { FilterState, Transaction } from '../types/finance';
@@ -154,5 +156,39 @@ describe('analytics service', () => {
     expect(weeklySeries.income[1]).toBe(30000); // Tuesday
     expect(weeklySeries.expense[0]).toBe(8000); // Monday
     expect(weeklySeries.expense[1]).toBe(500); // Tuesday
+  });
+
+  it('builds weekly and monthly stored period report snapshots accurately', () => {
+    const weeklyData = getPeriodTransactions(SAMPLE_TXS, 'weekly', REF_DATE);
+    expect(weeklyData.startDate).toBe('2026-11-09');
+    expect(weeklyData.endDate).toBe('2026-11-15');
+    expect(weeklyData.entries).toHaveLength(3);
+
+    const weeklyReport = buildStoredPeriodReport({
+      id: 'rep-w1',
+      periodType: 'weekly',
+      transactions: SAMPLE_TXS,
+      categories: DEFAULT_CATEGORIES,
+      divisions: DEFAULT_DIVISIONS,
+      referenceDate: REF_DATE,
+    });
+    expect(weeklyReport.totalIncome).toBe(30000);
+    expect(weeklyReport.totalExpense).toBe(8500);
+    expect(weeklyReport.balance).toBe(21500);
+    expect(weeklyReport.transactionCount).toBe(3);
+    expect(weeklyReport.categoryBreakdown.some((c) => c.id === 'cat-rent')).toBe(true);
+
+    const monthlyReport = buildStoredPeriodReport({
+      id: 'rep-m1',
+      periodType: 'monthly',
+      transactions: SAMPLE_TXS,
+      categories: DEFAULT_CATEGORIES,
+      divisions: DEFAULT_DIVISIONS,
+      referenceDate: REF_DATE,
+    });
+    expect(monthlyReport.startDate).toBe('2026-11-01');
+    expect(monthlyReport.endDate).toBe('2026-11-30');
+    expect(monthlyReport.transactionCount).toBe(3);
+    expect(monthlyReport.transactions.map((t) => t.id)).not.toContain('4');
   });
 });
