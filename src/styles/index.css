@@ -6,67 +6,67 @@
   --radius-pill: 999px;
   --transition: 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Crextio Ice-Blue + Deep Navy + Cobalt Palette (Light / Normal Theme) */
-  --bg-app: linear-gradient(135deg, #f2f6fc 0%, #e4eefb 50%, #d8e6f8 100%);
-  --bg-app-solid: #e8f0fb;
-  --bg-shell-panel: rgba(255, 255, 255, 0.65);
-  --bg-surface: rgba(255, 255, 255, 0.94);
-  --bg-elevated: #f3f7fd;
-  --bg-hover: #e7effb;
-  --bg-track: #e6edf7;
-  --text-primary: #10203a;
-  --text-secondary: #3c4f6b;
-  --text-muted: #6e819d;
-  --border-color: rgba(19, 49, 92, 0.1);
-  --shadow-sm: 0 4px 16px rgba(19, 49, 92, 0.05);
-  --shadow-md: 0 14px 36px rgba(19, 49, 92, 0.09);
+  /* FINNOVA Lavender-White + Obsidian-Indigo + Electric Violet Palette (Normal Theme) */
+  --bg-app: linear-gradient(135deg, #f7f7fb 0%, #f1f0f8 55%, #eceaf6 100%);
+  --bg-app-solid: #f3f2f9;
+  --bg-shell-panel: rgba(255, 255, 255, 0.78);
+  --bg-surface: #ffffff;
+  --bg-elevated: #f6f6fb;
+  --bg-hover: #eceaf7;
+  --bg-track: #eae8f5;
+  --text-primary: #181726;
+  --text-secondary: #4e4c6b;
+  --text-muted: #8482a0;
+  --border-color: rgba(24, 23, 38, 0.08);
+  --shadow-sm: 0 4px 16px rgba(24, 23, 38, 0.04);
+  --shadow-md: 0 14px 36px rgba(85, 70, 224, 0.12);
 
-  /* Brand & Semantic Accents from Crextio Reference */
-  --navy-deep: #1e40af;
-  --navy-card: linear-gradient(165deg, #2358b0 0%, #173c82 100%);
-  --onyx-pill: #1d4ed8;
+  /* Brand & Semantic Accents from FINNOVA Reference */
+  --navy-deep: #181828;
+  --navy-card: linear-gradient(165deg, #1f1e33 0%, #141422 100%);
+  --onyx-pill: #181828;
   --onyx-pill-text: #ffffff;
-  --accent: #0284c7;
-  --accent-hover: #0369a1;
-  --accent-soft: rgba(2, 132, 199, 0.13);
-  --income: #0fa968;
-  --income-soft: rgba(15, 169, 104, 0.13);
-  --expense: #e5484d;
-  --expense-soft: rgba(229, 72, 77, 0.12);
-  --balance: #1d4ed8;
-  --balance-soft: rgba(29, 78, 216, 0.1);
-  --ice-card: linear-gradient(145deg, #0ea5e9 0%, #2563eb 100%);
+  --accent: #5b4ce6;
+  --accent-hover: #493ad1;
+  --accent-soft: rgba(91, 76, 230, 0.12);
+  --income: #16a372;
+  --income-soft: rgba(22, 163, 114, 0.12);
+  --expense: #e05252;
+  --expense-soft: rgba(224, 82, 82, 0.12);
+  --balance: #5b4ce6;
+  --balance-soft: rgba(91, 76, 230, 0.12);
+  --ice-card: linear-gradient(145deg, #6e61f0 0%, #5546e0 55%, #4134b5 100%);
 }
 
 [data-theme='dark'] {
-  --bg-app: linear-gradient(135deg, #070d18 0%, #0c1729 55%, #101f36 100%);
-  --bg-app-solid: #0a1220;
-  --bg-shell-panel: rgba(16, 29, 50, 0.72);
-  --bg-surface: #122038;
-  --bg-elevated: #182a48;
-  --bg-hover: #21375c;
-  --bg-track: #1f3354;
-  --text-primary: #f1f6fd;
-  --text-secondary: #c5d6ee;
-  --text-muted: #8ea7c9;
-  --border-color: rgba(148, 184, 232, 0.15);
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.45);
+  --bg-app: linear-gradient(135deg, #0b0b14 0%, #121122 55%, #17152c 100%);
+  --bg-app-solid: #0e0e19;
+  --bg-shell-panel: rgba(22, 21, 38, 0.8);
+  --bg-surface: #161626;
+  --bg-elevated: #1e1e33;
+  --bg-hover: #272642;
+  --bg-track: #25243d;
+  --text-primary: #f5f5fb;
+  --text-secondary: #cbc9e6;
+  --text-muted: #9390b5;
+  --border-color: rgba(143, 132, 247, 0.16);
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.38);
+  --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.5);
 
-  --navy-deep: #38bdf8;
-  --navy-card: linear-gradient(165deg, #1d468c 0%, #122d5e 100%);
-  --onyx-pill: #2563eb;
+  --navy-deep: #8f84f7;
+  --navy-card: linear-gradient(165deg, #1d1c33 0%, #121121 100%);
+  --onyx-pill: #5b4ce6;
   --onyx-pill-text: #ffffff;
-  --accent: #38bdf8;
-  --accent-hover: #7dd3fc;
-  --accent-soft: rgba(56, 189, 248, 0.18);
+  --accent: #7a6df0;
+  --accent-hover: #9186f5;
+  --accent-soft: rgba(122, 109, 240, 0.18);
   --income: #2dd494;
   --income-soft: rgba(45, 212, 148, 0.16);
   --expense: #f87171;
   --expense-soft: rgba(248, 113, 113, 0.16);
-  --balance: #60a5fa;
-  --balance-soft: rgba(96, 165, 250, 0.18);
-  --ice-card: linear-gradient(145deg, #0284c7 0%, #1d4ed8 100%);
+  --balance: #a399f8;
+  --balance-soft: rgba(163, 153, 248, 0.18);
+  --ice-card: linear-gradient(145deg, #6557eb 0%, #483bc2 60%, #352b96 100%);
 }
 
 * {
@@ -243,12 +243,12 @@ button {
   top: 0;
   z-index: 40;
   backdrop-filter: blur(14px);
-  background: rgba(242, 246, 252, 0.72);
+  background: rgba(255, 255, 255, 0.84);
   border-bottom: 1px solid var(--border-color);
 }
 
 [data-theme='dark'] .app-header {
-  background: rgba(10, 18, 32, 0.78);
+  background: rgba(14, 14, 25, 0.84);
 }
 
 .header-inner {
@@ -276,7 +276,7 @@ button {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #13315c, #1c7eff);
+  background: linear-gradient(135deg, #5b4ce6, #7d71f4);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -392,7 +392,7 @@ button {
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
-  box-shadow: 0 6px 18px rgba(28, 126, 255, 0.28);
+  box-shadow: 0 6px 18px rgba(91, 76, 230, 0.28);
   transition: all var(--transition);
 }
 
@@ -409,7 +409,7 @@ button {
   padding: 10px 18px;
   border-radius: var(--radius-pill);
   border: none;
-  background: #13315c;
+  background: #181828;
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
@@ -417,7 +417,7 @@ button {
 }
 
 .btn-navy:hover {
-  background: #1b447e;
+  background: #282640;
   transform: translateY(-1px);
 }
 
@@ -569,20 +569,20 @@ button {
 }
 
 .seg-pill.navy {
-  background: #1d4ed8;
+  background: #181828;
   color: #ffffff;
 }
 
 .seg-pill.cobalt {
-  background: #0ea5e9;
+  background: #5b4ce6;
   color: #ffffff;
 }
 
 .seg-pill.hatched {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(19, 49, 92, 0.08),
-    rgba(19, 49, 92, 0.08) 5px,
+    rgba(91, 76, 230, 0.09),
+    rgba(91, 76, 230, 0.09) 5px,
     transparent 5px,
     transparent 10px
   );
@@ -846,8 +846,8 @@ button {
 }
 
 .navy-mini-btn:hover {
-  background: #1c7eff;
-  border-color: #1c7eff;
+  background: #5b4ce6;
+  border-color: #5b4ce6;
 }
 
 .navy-mini-btn.danger:hover {
@@ -1503,7 +1503,7 @@ button {
   font-size: 0.88rem;
   box-shadow: var(--shadow-md);
   color: #fff;
-  background: #13315c;
+  background: #5b4ce6;
 }
 
 .toast-banner.error {
@@ -1530,7 +1530,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 2px solid #13315c;
+  border-bottom: 2px solid #5b4ce6;
   padding-bottom: 12px;
   margin-bottom: 16px;
 }
