@@ -118,13 +118,23 @@ export async function loadFinanceState(): Promise<StoredFinanceState> {
     readKey<StoredPeriodReport[]>(KEY_ARCHIVES),
   ]);
 
-  const resolvedSettings: AppSettings = settings ?? {
+  let resolvedSettings: AppSettings = settings ?? {
     ...DEFAULT_SETTINGS,
     theme:
       (typeof localStorage !== 'undefined' &&
         (localStorage.getItem(THEME_LOCAL_KEY) as 'light' | 'dark' | null)) ||
       DEFAULT_SETTINGS.theme,
   };
+
+  if (typeof localStorage !== 'undefined' && !localStorage.getItem('myfin_goodhealth_theme_v1')) {
+    resolvedSettings = { ...resolvedSettings, theme: 'light' };
+    try {
+      localStorage.setItem(THEME_LOCAL_KEY, 'light');
+      localStorage.setItem('myfin_goodhealth_theme_v1', '1');
+    } catch {
+      // Ignore
+    }
+  }
 
   return {
     transactions: Array.isArray(transactions) ? transactions : [],
