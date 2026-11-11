@@ -32,7 +32,7 @@ import type { DateFilterPreset, TransactionType } from '../types/finance';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend, Title);
 
-const CAPSULE_COLORS = ['#13315c', '#1c7eff', '#2c5ca8', '#0fa968'];
+const CAPSULE_COLORS = ['#2f6c5c', '#3b7a68', '#d99b18', '#528d7b'];
 
 export function DashboardBento() {
   const {
@@ -54,8 +54,8 @@ export function DashboardBento() {
 
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
-  const textColor = isDark ? '#c5d6ee' : '#3c4f6b';
-  const gridColor = isDark ? 'rgba(148, 184, 232, 0.12)' : 'rgba(19, 49, 92, 0.08)';
+  const textColor = isDark ? '#bfd6ce' : '#476058';
+  const gridColor = isDark ? 'rgba(116, 198, 169, 0.14)' : 'rgba(47, 108, 92, 0.08)';
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const divisionMap = useMemo(() => new Map(divisions.map((d) => [d.id, d])), [divisions]);
@@ -112,7 +112,7 @@ export function DashboardBento() {
         {
           label: t(lang, 'income'),
           data: timeSeries.income,
-          backgroundColor: isDark ? '#3b91ff' : '#13315c',
+          backgroundColor: isDark ? '#4ea88f' : '#2f6c5c',
           borderRadius: 10,
           borderSkipped: false as const,
           maxBarThickness: 18,
@@ -120,7 +120,7 @@ export function DashboardBento() {
         {
           label: t(lang, 'expense'),
           data: timeSeries.expense,
-          backgroundColor: '#1c7eff',
+          backgroundColor: '#f4c245',
           borderRadius: 10,
           borderSkipped: false as const,
           maxBarThickness: 18,
@@ -141,9 +141,9 @@ export function DashboardBento() {
           labels: { color: textColor, boxWidth: 8, usePointStyle: true, pointStyle: 'circle' },
         },
         tooltip: {
-          backgroundColor: '#13315c',
+          backgroundColor: '#265648',
           titleColor: '#ffffff',
-          bodyColor: '#e2e8f0',
+          bodyColor: '#e2f3ec',
           padding: 10,
           cornerRadius: 10,
           callbacks: {
@@ -177,9 +177,9 @@ export function DashboardBento() {
         {
           data: expenseCategories.map((r) => r.expense),
           backgroundColor: expenseCategories.map((r, i) =>
-            i === 0 ? '#13315c' : i === 1 ? '#1c7eff' : i === 2 ? '#5ba2ff' : r.category.color,
+            i === 0 ? '#2f6c5c' : i === 1 ? '#f4c245' : i === 2 ? '#5ea18c' : r.category.color,
           ),
-          borderColor: isDark ? '#122038' : '#ffffff',
+          borderColor: isDark ? '#142620' : '#ffffff',
           borderWidth: 3,
           hoverOffset: 6,
         },
@@ -206,7 +206,7 @@ export function DashboardBento() {
           },
         },
         tooltip: {
-          backgroundColor: '#13315c',
+          backgroundColor: '#265648',
           padding: 10,
           cornerRadius: 10,
           callbacks: {
@@ -391,7 +391,7 @@ export function DashboardBento() {
                     cy="75"
                     r={ringRadius}
                     fill="none"
-                    stroke="#1c7eff"
+                    stroke="#3b7a68"
                     strokeWidth="9"
                     strokeLinecap="round"
                     strokeDasharray={ringCircumference}
@@ -630,10 +630,10 @@ export function DashboardBento() {
           </div>
 
           {recentRows.length === 0 ? (
-            <div className="empty-state" style={{ color: '#dbeafe', padding: '18px 4px' }}>
-              <Wallet size={30} color="#60a5fa" />
+            <div className="empty-state" style={{ color: '#e2f3ec', padding: '18px 4px' }}>
+              <Wallet size={30} color="#f4c245" />
               <h3 style={{ color: '#ffffff' }}>{t(lang, 'noTransactionsTitle')}</h3>
-              <p style={{ color: '#bfdbfe' }}>{t(lang, 'noTransactionsDesc')}</p>
+              <p style={{ color: '#b8e0d2' }}>{t(lang, 'noTransactionsDesc')}</p>
               <div className="actions-toolbar" style={{ justifyContent: 'center' }}>
                 <button type="button" className="btn-primary" onClick={() => openAddModal()}>
                   <Plus size={15} />
@@ -659,7 +659,7 @@ export function DashboardBento() {
                         <div className="todo-tx-title" style={{ color: '#ffffff' }}>
                           {tx.note || getLocalizedName(cat, lang)}
                         </div>
-                        <div className="todo-tx-sub" style={{ color: '#93c5fd' }}>
+                        <div className="todo-tx-sub" style={{ color: '#b6e3d3' }}>
                           {formatDisplayDate(tx.date, lang)} • {getLocalizedName(div, lang)}
                         </div>
                       </div>

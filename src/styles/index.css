@@ -6,67 +6,67 @@
   --radius-pill: 999px;
   --transition: 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Crextio Ice-Blue + Deep Navy + Cobalt Blue Palette (Normal / Light Theme) */
-  --bg-app: linear-gradient(135deg, #f2f6fc 0%, #e4eefb 50%, #d8e6f8 100%);
-  --bg-app-solid: #e8f0fb;
-  --bg-shell-panel: rgba(255, 255, 255, 0.72);
-  --bg-surface: rgba(255, 255, 255, 0.94);
-  --bg-elevated: #f3f7fd;
-  --bg-hover: #e7effb;
-  --bg-track: #e6edf7;
-  --text-primary: #10203a;
-  --text-secondary: #3c4f6b;
-  --text-muted: #6e819d;
-  --border-color: rgba(19, 49, 92, 0.1);
-  --shadow-sm: 0 4px 16px rgba(19, 49, 92, 0.05);
-  --shadow-md: 0 14px 36px rgba(19, 49, 92, 0.09);
+  /* Sage Eucalyptus Green + Warm Honey Gold + Mint-White Palette */
+  --bg-app: linear-gradient(135deg, #f8faf9 0%, #eff4f2 55%, #e6efeb 100%);
+  --bg-app-solid: #f2f6f4;
+  --bg-shell-panel: rgba(255, 255, 255, 0.78);
+  --bg-surface: rgba(255, 255, 255, 0.96);
+  --bg-elevated: #eef5f2;
+  --bg-hover: #e2eee9;
+  --bg-track: #e3ece8;
+  --text-primary: #182924;
+  --text-secondary: #476058;
+  --text-muted: #758c84;
+  --border-color: rgba(47, 108, 92, 0.12);
+  --shadow-sm: 0 4px 16px rgba(34, 78, 66, 0.05);
+  --shadow-md: 0 14px 36px rgba(34, 78, 66, 0.09);
 
-  /* Brand & Semantic Accents from Crextio Reference */
-  --navy-deep: #13315c;
-  --navy-card: linear-gradient(165deg, #173a6e 0%, #0f264a 100%);
-  --onyx-pill: #13315c;
+  /* Brand & Semantic Accents from Reference */
+  --navy-deep: #2f6c5c;
+  --navy-card: linear-gradient(165deg, #3b7a68 0%, #265648 100%);
+  --onyx-pill: #357362;
   --onyx-pill-text: #ffffff;
-  --accent: #1c7eff;
-  --accent-hover: #0d68e6;
-  --accent-soft: rgba(28, 126, 255, 0.13);
-  --income: #0fa968;
-  --income-soft: rgba(15, 169, 104, 0.13);
-  --expense: #e5484d;
-  --expense-soft: rgba(229, 72, 77, 0.12);
-  --balance: #13315c;
-  --balance-soft: rgba(19, 49, 92, 0.1);
-  --ice-card: linear-gradient(145deg, #3b8ee8 0%, #1e62b5 58%, #154482 100%);
+  --accent: #3b7a68;
+  --accent-hover: #2b6152;
+  --accent-soft: rgba(59, 122, 104, 0.13);
+  --income: #238768;
+  --income-soft: rgba(35, 135, 104, 0.13);
+  --expense: #d65a47;
+  --expense-soft: rgba(214, 90, 71, 0.12);
+  --balance: #2f6c5c;
+  --balance-soft: rgba(47, 108, 92, 0.11);
+  --ice-card: linear-gradient(145deg, #4b8f7b 0%, #377261 62%, #255245 100%);
 }
 
 [data-theme='dark'] {
-  --bg-app: linear-gradient(135deg, #070d18 0%, #0c1729 55%, #101f36 100%);
-  --bg-app-solid: #0a1220;
-  --bg-shell-panel: rgba(16, 29, 50, 0.72);
-  --bg-surface: #122038;
-  --bg-elevated: #182a48;
-  --bg-hover: #21375c;
-  --bg-track: #1f3354;
-  --text-primary: #f1f6fd;
-  --text-secondary: #c5d6ee;
-  --text-muted: #8ea7c9;
-  --border-color: rgba(148, 184, 232, 0.15);
+  --bg-app: linear-gradient(135deg, #0b1613 0%, #10211c 55%, #152b25 100%);
+  --bg-app-solid: #0c1815;
+  --bg-shell-panel: rgba(19, 38, 32, 0.78);
+  --bg-surface: #142620;
+  --bg-elevated: #1b322a;
+  --bg-hover: #234036;
+  --bg-track: #203a31;
+  --text-primary: #eff7f4;
+  --text-secondary: #bfd6ce;
+  --text-muted: #85a79b;
+  --border-color: rgba(116, 198, 169, 0.16);
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 16px 38px rgba(0, 0, 0, 0.45);
 
-  --navy-deep: #3b91ff;
-  --navy-card: linear-gradient(165deg, #16325e 0%, #0b1b36 100%);
-  --onyx-pill: #1c7eff;
+  --navy-deep: #5cc4a5;
+  --navy-card: linear-gradient(165deg, #27584a 0%, #16362d 100%);
+  --onyx-pill: #3b8c76;
   --onyx-pill-text: #ffffff;
-  --accent: #3b91ff;
-  --accent-hover: #5aa3ff;
-  --accent-soft: rgba(59, 145, 255, 0.18);
-  --income: #2dd494;
-  --income-soft: rgba(45, 212, 148, 0.16);
+  --accent: #4ea88f;
+  --accent-hover: #66be9f;
+  --accent-soft: rgba(78, 168, 143, 0.18);
+  --income: #34d399;
+  --income-soft: rgba(52, 211, 153, 0.16);
   --expense: #f87171;
   --expense-soft: rgba(248, 113, 113, 0.16);
-  --balance: #60a5fa;
-  --balance-soft: rgba(96, 165, 250, 0.18);
-  --ice-card: linear-gradient(145deg, #1e6fe0 0%, #15458a 58%, #0f2952 100%);
+  --balance: #6bd1b4;
+  --balance-soft: rgba(107, 209, 180, 0.18);
+  --ice-card: linear-gradient(145deg, #3e806d 0%, #2a5d4e 58%, #1a3d33 100%);
 }
 
 * {
@@ -190,7 +190,7 @@ button {
 .sidebar-nav-btn.active {
   background: var(--onyx-pill);
   color: var(--onyx-pill-text);
-  box-shadow: 0 6px 16px rgba(19, 49, 92, 0.22);
+  box-shadow: 0 6px 16px rgba(47, 108, 92, 0.24);
 }
 
 .sidebar-nav-icon {
@@ -264,12 +264,12 @@ button {
   max-width: 100%;
   overflow-x: clip;
   backdrop-filter: blur(14px);
-  background: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.88);
   border-bottom: 1px solid var(--border-color);
 }
 
 [data-theme='dark'] .app-header {
-  background: rgba(10, 18, 32, 0.8);
+  background: rgba(12, 24, 21, 0.86);
 }
 
 .header-inner {
@@ -303,7 +303,7 @@ button {
 }
 
 .brand-dot {
-  color: var(--accent);
+  color: #f4c245;
 }
 
 .header-square-btn {
@@ -353,7 +353,7 @@ button {
   height: 40px;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, var(--navy-deep), var(--accent));
+  background: linear-gradient(135deg, #2f6c5c, #4b8f7b);
   color: #ffffff;
   font-size: 0.88rem;
   font-weight: 800;
@@ -395,7 +395,7 @@ button {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #13315c, #1c7eff);
+  background: linear-gradient(135deg, #2f6c5c, #4b8f7b);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -468,7 +468,7 @@ button {
 .nav-btn.active {
   background: var(--onyx-pill);
   color: var(--onyx-pill-text);
-  box-shadow: 0 4px 12px rgba(19, 49, 92, 0.25);
+  box-shadow: 0 4px 12px rgba(47, 108, 92, 0.25);
 }
 
 .header-actions {
@@ -511,7 +511,7 @@ button {
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
-  box-shadow: 0 6px 18px rgba(28, 126, 255, 0.28);
+  box-shadow: 0 6px 18px rgba(47, 108, 92, 0.28);
   transition: all var(--transition);
 }
 
@@ -528,7 +528,7 @@ button {
   padding: 10px 18px;
   border-radius: var(--radius-pill);
   border: none;
-  background: #13315c;
+  background: #2f6c5c;
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
@@ -536,7 +536,7 @@ button {
 }
 
 .btn-navy:hover {
-  background: #1b447e;
+  background: #25574a;
   transform: translateY(-1px);
 }
 
@@ -749,20 +749,20 @@ button {
 }
 
 .seg-pill.navy {
-  background: #13315c;
+  background: #2f6c5c;
   color: #ffffff;
 }
 
 .seg-pill.cobalt {
-  background: #1c7eff;
-  color: #ffffff;
+  background: #f4c245;
+  color: #182924;
 }
 
 .seg-pill.hatched {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(19, 49, 92, 0.08),
-    rgba(19, 49, 92, 0.08) 5px,
+    rgba(47, 108, 92, 0.08),
+    rgba(47, 108, 92, 0.08) 5px,
     transparent 5px,
     transparent 10px
   );
@@ -836,10 +836,11 @@ button {
   max-width: 100%;
 }
 
-/* Left Ice-Blue Balance Spotlight Card (Crextio Alex Chen Card Feel) */
+/* Left Balance Spotlight Card (Eucalyptus Green + Marigold Stripe) */
 .ice-spotlight-card {
   border-radius: var(--radius-md);
   background: var(--ice-card);
+  border-bottom: 5px solid #f4c245;
   padding: 14px 16px;
   color: #ffffff;
   display: flex;
@@ -1095,13 +1096,15 @@ button {
 }
 
 .navy-mini-btn:hover {
-  background: #1c7eff;
-  border-color: #1c7eff;
+  background: #f4c245;
+  border-color: #f4c245;
+  color: #182924;
 }
 
 .navy-mini-btn.danger:hover {
-  background: #e5484d;
-  border-color: #e5484d;
+  background: #d65a47;
+  border-color: #d65a47;
+  color: #ffffff;
 }
 
 /* Period Tabs inside Center Calendar/Breakdown Card */
@@ -1656,7 +1659,7 @@ button {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(15, 38, 74, 0.52);
+  background: rgba(24, 41, 36, 0.5);
   backdrop-filter: blur(6px);
   display: grid;
   place-items: center;
@@ -1786,11 +1789,11 @@ button {
   font-size: 0.88rem;
   box-shadow: var(--shadow-md);
   color: #fff;
-  background: #13315c;
+  background: #2f6c5c;
 }
 
 .toast-banner.error {
-  background: #e5484d;
+  background: #d65a47;
 }
 
 /* Offscreen PDF Template */
@@ -1800,7 +1803,7 @@ button {
   top: 0;
   width: 794px;
   background: #ffffff;
-  color: #10203a;
+  color: #182924;
   padding: 28px;
   font-family: var(--font-sans);
 }
@@ -1813,7 +1816,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 2px solid #13315c;
+  border-bottom: 2px solid #2f6c5c;
   padding-bottom: 12px;
   margin-bottom: 16px;
 }
@@ -1902,7 +1905,7 @@ button {
     position: fixed;
     inset: 0;
     top: 54px;
-    background: rgba(15, 38, 74, 0.38);
+    background: rgba(24, 41, 36, 0.42);
     backdrop-filter: blur(2px);
     z-index: 50;
   }
@@ -2198,7 +2201,7 @@ button {
 
 .calendar-day-cell.in-scope {
   background: var(--accent-soft);
-  border-color: rgba(28, 126, 255, 0.35);
+  border-color: rgba(59, 122, 104, 0.35);
 }
 
 .calendar-day-cell.selected {
@@ -2251,7 +2254,7 @@ button {
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 999px;
-  background: rgba(19, 49, 92, 0.12);
+  background: rgba(47, 108, 92, 0.14);
 }
 
 .calendar-day-cell.selected .calendar-day-count {
@@ -2282,7 +2285,7 @@ button {
 @media print {
   body {
     background: #ffffff !important;
-    color: #10203a !important;
+    color: #182924 !important;
   }
   .no-print {
     display: none !important;
@@ -2291,6 +2294,6 @@ button {
     display: block !important;
     padding: 0;
     margin: 0;
-    color: #10203a;
+    color: #182924;
   }
 }
