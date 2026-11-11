@@ -13,10 +13,13 @@ import {
   PanelLeftOpen,
   Plus,
   RotateCcw,
+  Search,
   Sun,
+  X,
 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
-import { t } from '../i18n/translations';
+import { getLocalizedName, t } from '../i18n/translations';
 import type { ActiveTab } from '../types/finance';
 
 interface SidebarProps {
@@ -36,6 +39,10 @@ export function Header({
     settings,
     summary,
     activeTab,
+    categories,
+    divisions,
+    filters,
+    setFilters,
     cloudUser,
     syncStatus,
     setActiveTab,
@@ -47,6 +54,35 @@ export function Header({
   } = useFinance();
   const lang = settings.language;
   const isDark = settings.theme === 'dark';
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const trimmedQuery = filters.searchQuery.trim().toLowerCase();
+  const matchingCategories = useMemo(() => {
+    if (!trimmedQuery) return [];
+    return categories.filter((c) =>
+      `${c.nameMl} ${c.nameEn}`.toLowerCase().includes(trimmedQuery),
+    );
+  }, [categories, trimmedQuery]);
+
+  const matchingDivisions = useMemo(() => {
+    if (!trimmedQuery) return [];
+    return divisions.filter((d) =>
+      `${d.nameMl} ${d.nameEn}`.toLowerCase().includes(trimmedQuery),
+    );
+  }, [divisions, trimmedQuery]);
+
+  const activeCategory = useMemo(
+    () =>
+      filters.categoryId !== 'all'
+        ? categories.find((c) => c.id === filters.categoryId) ?? null
+        : null,
+    [categories, filters.categoryId],
+  );
+
+  const showDropdown =
+    isSearchFocused &&
+    trimmedQuery.length > 0 &&
+    (matchingCategories.length > 0 || matchingDivisions.length > 0);
 
   const navItems: Array<{ id: ActiveTab; label: string; icon: JSX.Element }> = [
     { id: 'dashboard', label: t(lang, 'navDashboard'), icon: <LayoutDashboard size={17} /> },
@@ -68,21 +104,118 @@ export function Header({
               aria-expanded={isSidebarExpanded}
               title="Menu"
             >
-              <Menu size={18} />
+              <Menu size={17} />
             </button>
 
-            <h1 className="brand-wordmark">
-              <span className="brand-health-mark" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            <h1 className="brand-wordmark ux-brand-pill">
+              <span className="brand-ux-mark" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z" />
                 </svg>
               </span>
               <span>{t(lang, 'appName')}</span>
-              <span className="brand-dot">.</span>
             </h1>
           </div>
 
+          <nav className="header-center-pills" aria-label="Primary tabs">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`header-nav-pill ${activeTab === item.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(item.id)}
+              >
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
           <div className="header-actions">
+            {activeCategory && (
+              <button
+                type="button"
+                className="ux-active-cat-chip"
+                onClick={() => setFilters((prev) => ({ ...prev, categoryId: 'all' }))}
+                title={t(lang, 'clearFilters')}
+              >
+                <span>
+                  {activeCategory.icon} {getLocalizedName(activeCategory, lang)}
+                </span>
+                <X size={12} />
+              </button>
+            )}
+
+            <div
+              className={`ux-header-search ${isSearchFocused || filters.searchQuery ? 'open' : ''}`}
+            >
+              <Search size={15} className="ux-header-search-icon" aria-hidden="true" />
+              <input
+                type="search"
+                className="ux-header-search-input"
+                placeholder={t(lang, 'searchPlaceholder')}
+                aria-label={t(lang, 'note')}
+                value={filters.searchQuery}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
+              />
+
+              {showDropdown && (
+                <div className="search-dropdown" role="listbox" aria-label="Category search matches">
+                  {matchingCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className="search-dropdown-item"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setFilters((prev) => ({
+                          ...prev,
+                          categoryId: cat.id,
+                          searchQuery: '',
+                        }));
+                        if (activeTab === 'dashboard') {
+                          setActiveTab('categories');
+                        }
+                        setIsSearchFocused(false);
+                      }}
+                    >
+                      <span>
+                        {cat.icon} {getLocalizedName(cat, lang)}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        {t(lang, 'category')}
+                      </span>
+                    </button>
+                  ))}
+
+                  {matchingDivisions.map((div) => (
+                    <button
+                      key={div.id}
+                      type="button"
+                      className="search-dropdown-item"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setFilters((prev) => ({
+                          ...prev,
+                          divisionId: div.id,
+                          searchQuery: '',
+                        }));
+                        setIsSearchFocused(false);
+                      }}
+                    >
+                      <span>
+                        {div.icon} {getLocalizedName(div, lang)}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        {t(lang, 'division')}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button
               type="button"
               className="header-lang-pill"
@@ -90,9 +223,9 @@ export function Header({
               title={t(lang, 'switchLang')}
               aria-label={t(lang, 'switchLang')}
             >
-              <Globe size={15} />
+              <Globe size={14} />
               <span>{lang === 'ml' ? 'English' : 'മലയാളം'}</span>
-              <ChevronDown size={14} className="header-lang-chevron" />
+              <ChevronDown size={13} className="header-lang-chevron" />
             </button>
 
             <button
@@ -102,7 +235,7 @@ export function Header({
               aria-label={isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
               title={isDark ? t(lang, 'lightMode') : t(lang, 'darkMode')}
             >
-              {isDark ? <Sun size={16} color="#facc15" /> : <Moon size={16} />}
+              {isDark ? <Sun size={15} color="#facc15" /> : <Moon size={15} />}
             </button>
 
             <button
@@ -118,7 +251,7 @@ export function Header({
               }
             >
               <Cloud
-                size={16}
+                size={15}
                 color={
                   cloudUser
                     ? 'var(--income)'
@@ -153,27 +286,7 @@ export function Header({
               aria-label={t(lang, 'clearFilters')}
               title={t(lang, 'clearFilters')}
             >
-              <RotateCcw size={15} />
-            </button>
-
-            <button
-              type="button"
-              className="header-square-btn header-desktop-only"
-              onClick={() => setActiveTab('calendar')}
-              aria-label={t(lang, 'navCalendar')}
-              title={t(lang, 'navCalendar')}
-            >
-              <CalendarDays size={16} />
-            </button>
-
-            <button
-              type="button"
-              className="header-square-btn header-desktop-only"
-              onClick={() => setActiveTab('categories')}
-              aria-label={t(lang, 'navCategories')}
-              title={t(lang, 'navCategories')}
-            >
-              <FolderKanban size={16} />
+              <RotateCcw size={14} />
             </button>
 
             <button
@@ -291,16 +404,14 @@ export function LeftSidebar({ isExpanded, onToggleExpand, onCloseMobile }: Sideb
 
           <button
             type="button"
-            className="sidebar-nav-btn"
+            className="sidebar-nav-btn sidebar-collapse-btn"
             onClick={onToggleExpand}
-            title={isExpanded ? 'Collapse' : 'Expand'}
+            title={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
           >
             <span className="sidebar-nav-icon">
               {isExpanded ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
             </span>
-            <span className="sidebar-nav-label">
-              {lang === 'ml' ? (isExpanded ? 'ചുരുക്കുക' : 'വികസിപ്പിക്കുക') : isExpanded ? 'Collapse' : 'Expand'}
-            </span>
+            <span className="sidebar-nav-label">{t(lang, 'offlineReady')}</span>
           </button>
         </div>
       </aside>

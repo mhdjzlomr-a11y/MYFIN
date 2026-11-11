@@ -126,11 +126,11 @@ export async function loadFinanceState(): Promise<StoredFinanceState> {
       DEFAULT_SETTINGS.theme,
   };
 
-  if (typeof localStorage !== 'undefined' && !localStorage.getItem('myfin_goodhealth_theme_v1')) {
+  if (typeof localStorage !== 'undefined' && !localStorage.getItem('myfin_uxboost_theme_v1')) {
     resolvedSettings = { ...resolvedSettings, theme: 'light' };
     try {
       localStorage.setItem(THEME_LOCAL_KEY, 'light');
-      localStorage.setItem('myfin_goodhealth_theme_v1', '1');
+      localStorage.setItem('myfin_uxboost_theme_v1', '1');
     } catch {
       // Ignore
     }

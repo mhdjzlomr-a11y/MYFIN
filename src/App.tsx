@@ -9,7 +9,6 @@ import { PrintableReportSheet, ReportsExport } from './components/ReportsExport'
 import { SummaryCards } from './components/SummaryCards';
 import { TransactionList } from './components/TransactionList';
 import { TransactionModal } from './components/TransactionModal';
-import { WorkspaceHero } from './components/WorkspaceHero';
 import { FinanceProvider, useFinance } from './context/FinanceContext';
 
 function FinanceWorkspace() {
@@ -31,8 +30,6 @@ function FinanceWorkspace() {
         />
 
         <main className="main-container">
-          <WorkspaceHero />
-
           <div key={activeTab} className="tab-panel-animate">
             {activeTab === 'dashboard' && <DashboardBento />}
 
