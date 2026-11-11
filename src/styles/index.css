@@ -131,16 +131,16 @@ button {
 
 .left-sidebar {
   position: sticky;
-  top: 76px;
+  top: 78px;
   align-self: flex-start;
-  height: calc(100vh - 96px);
-  width: 74px;
-  margin: 16px 0 16px 18px;
-  padding: 12px 10px;
-  border-radius: var(--radius-lg);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  height: calc(100vh - 98px);
+  width: 72px;
+  margin: 14px 0 16px 0;
+  padding: 16px 11px;
+  border-radius: 0 30px 30px 0;
+  background: linear-gradient(180deg, #437f6c 0%, #2e6454 100%);
+  border: none;
+  box-shadow: 0 12px 28px rgba(34, 78, 66, 0.16);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -170,11 +170,11 @@ button {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 11px 14px;
-  border-radius: var(--radius-pill);
+  padding: 11px 13px;
+  border-radius: 16px;
   border: 1px solid transparent;
   background: transparent;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.84);
   font-size: 0.88rem;
   font-weight: 700;
   white-space: nowrap;
@@ -183,14 +183,25 @@ button {
 }
 
 .sidebar-nav-btn:hover {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
 }
 
 .sidebar-nav-btn.active {
-  background: var(--onyx-pill);
-  color: var(--onyx-pill-text);
-  box-shadow: 0 6px 16px rgba(47, 108, 92, 0.24);
+  background: #ffffff;
+  color: #2f6c5c;
+  box-shadow: 0 6px 18px rgba(17, 45, 37, 0.22);
+}
+
+.sidebar-add-btn {
+  background: #f4c245;
+  color: #182924;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.sidebar-add-btn:hover {
+  background: #f7cd63;
+  color: #182924;
 }
 
 .sidebar-nav-icon {
@@ -299,7 +310,18 @@ button {
   line-height: 1;
   color: var(--navy-deep);
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand-diamond {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: #f4c245;
+  border: 2.5px solid #2f6c5c;
+  transform: rotate(45deg);
+  flex-shrink: 0;
 }
 
 .brand-dot {
@@ -1855,6 +1877,11 @@ button {
 
 /* Responsive Breakpoints */
 @media (max-width: 1180px) {
+  .sage-row-1,
+  .sage-row-2,
+  .sage-row-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .crextio-bento {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2083,6 +2110,15 @@ button {
 }
 
 @media (max-width: 560px) {
+  .sage-card-and-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sage-card-showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sage-quick-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
   .responsive-grid-2,
   .filter-controls-row {
     grid-template-columns: minmax(0, 1fr);
@@ -2093,6 +2129,9 @@ button {
 }
 
 @media (max-width: 420px) {
+  .brand-diamond {
+    display: none;
+  }
   .header-inner {
     padding: 8px;
     gap: 4px;
@@ -2278,6 +2317,301 @@ button {
   .calendar-day-count {
     font-size: 0.6rem;
     padding: 0 4px;
+  }
+}
+
+/* 3-Row Sage Eucalyptus + Honey Gold Bento Frontend */
+.sage-bento-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sage-row-1 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sage-row-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.8fr);
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sage-row-3 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sage-row-1 > *,
+.sage-row-2 > *,
+.sage-row-3 > *,
+.sage-card-and-actions > *,
+.sage-card-showcase > *,
+.sage-quick-tiles > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sage-card-and-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.sage-card-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.sage-debit-card {
+  min-height: 112px;
+  justify-content: space-between;
+  border-radius: 18px;
+  padding: 15px 16px;
+  border-bottom: 6px solid #f4c245;
+}
+
+.sage-balance-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sage-quick-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sage-action-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 6px;
+  border-radius: 18px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: all var(--transition);
+  min-width: 0;
+}
+
+.sage-action-tile:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.sage-tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 10px rgba(47, 108, 92, 0.22);
+}
+
+.sage-circle-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.sage-circle-badge.income {
+  background: var(--income-soft);
+  color: var(--income);
+}
+
+.sage-circle-badge.expense {
+  background: var(--expense-soft);
+  color: var(--expense);
+}
+
+.sage-mini-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
+  color: var(--navy-deep);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  transition: all var(--transition);
+}
+
+.sage-mini-link:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.sage-spark-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sage-sparkline-svg {
+  width: 100%;
+  height: 58px;
+  display: block;
+}
+
+.sage-spark-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sage-plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sage-plan-item {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  transition: all var(--transition);
+}
+
+.sage-plan-item:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.sage-plan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sage-plan-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sage-plan-amount {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--navy-deep);
+  flex-shrink: 0;
+}
+
+.sage-plan-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-track);
+  overflow: hidden;
+}
+
+.sage-plan-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f4c245, #eab308);
+  transition: width 0.35s ease;
+}
+
+.sage-tx-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  min-width: 0;
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition);
+}
+
+.sage-tx-row:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.sage-tx-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1180px) {
+  .sage-row-1,
+  .sage-row-2,
+  .sage-row-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sage-card-and-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .sage-card-showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sage-action-tile {
+    padding: 12px 4px;
+    font-size: 0.72rem;
+    gap: 6px;
   }
 }
 

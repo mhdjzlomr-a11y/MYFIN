@@ -72,6 +72,7 @@ export function Header({
             </button>
 
             <h1 className="brand-wordmark">
+              <span className="brand-diamond" aria-hidden="true" />
               <span>{t(lang, 'appName')}</span>
               <span className="brand-dot">.</span>
             </h1>
@@ -271,8 +272,7 @@ export function LeftSidebar({ isExpanded, onToggleExpand, onCloseMobile }: Sideb
         <div className="sidebar-nav-list">
           <button
             type="button"
-            className="sidebar-nav-btn"
-            style={{ background: 'var(--accent)', color: '#ffffff' }}
+            className="sidebar-nav-btn sidebar-add-btn"
             onClick={() => {
               openAddModal();
               onCloseMobile();

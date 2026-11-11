@@ -1,16 +1,7 @@
 import {
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Title,
-  Tooltip,
-  type ChartOptions,
-} from 'chart.js';
-import {
   Archive,
+  ArrowDownCircle,
+  ArrowUpCircle,
   ArrowUpRight,
   BarChart2,
   Calendar,
@@ -21,18 +12,84 @@ import {
   Plus,
   Sparkles,
   Trash2,
+  TrendingUp,
   Wallet,
 } from 'lucide-react';
 import { useMemo } from 'react';
-import { Bar, Doughnut } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+  type ChartOptions,
+} from 'chart.js';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, formatDisplayDate, getLocalizedName, t } from '../i18n/translations';
 import { computeTimeSeries } from '../services/analytics';
 import type { DateFilterPreset, TransactionType } from '../types/finance';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend, Title);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
-const CAPSULE_COLORS = ['#2f6c5c', '#3b7a68', '#d99b18', '#528d7b'];
+function SparklineWave({
+  values,
+  strokeColor,
+  gradientId,
+}: {
+  values: number[];
+  strokeColor: string;
+  gradientId: string;
+}) {
+  const safeValues =
+    values.length >= 2 && values.some((v) => v !== 0)
+      ? values
+      : [18, 26, 21, 30, 24, 34, 29];
+
+  const width = 180;
+  const height = 52;
+  const padY = 6;
+  const minVal = Math.min(...safeValues);
+  const maxVal = Math.max(...safeValues);
+  const span = maxVal - minVal || 1;
+
+  const points = safeValues.map((val, idx) => {
+    const x = (idx / Math.max(1, safeValues.length - 1)) * width;
+    const norm = (val - minVal) / span;
+    const y = height - padY - norm * (height - padY * 2);
+    return { x: Number(x.toFixed(1)), y: Number(y.toFixed(1)) };
+  });
+
+  const linePath = points.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`).join(' ');
+  const areaPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="sage-sparkline-svg"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill={`url(#${gradientId})`} />
+      <path
+        d={linePath}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function DashboardBento() {
   const {
@@ -60,15 +117,14 @@ export function DashboardBento() {
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const divisionMap = useMemo(() => new Map(divisions.map((d) => [d.id, d])), [divisions]);
 
-  // Circular Ring Progress (Savings / Balance ratio)
   const gaugePct = useMemo(() => {
     if (summary.totalIncome <= 0) return summary.totalExpense > 0 ? 0 : 100;
     return Math.max(0, Math.min(100, Math.round((summary.balance / summary.totalIncome) * 100)));
   }, [summary]);
 
-  const ringRadius = 58;
-  const ringCircumference = 2 * Math.PI * ringRadius;
-  const ringOffset = ringCircumference * (1 - gaugePct / 100);
+  const totalFlow = summary.totalIncome + summary.totalExpense;
+  const incomeSharePct = totalFlow > 0 ? Math.round((summary.totalIncome / totalFlow) * 100) : 50;
+  const expenseSharePct = totalFlow > 0 ? 100 - incomeSharePct : 50;
 
   const presets: Array<{ id: DateFilterPreset; label: string }> = [
     { id: 'daily', label: t(lang, 'filterDaily') },
@@ -90,9 +146,9 @@ export function DashboardBento() {
     [filteredTransactions, filters.preset, filters.startDate, filters.endDate, lang],
   );
 
-  const expenseCategories = useMemo(
-    () => categorySummary.filter((row) => row.expense > 0),
-    [categorySummary],
+  const profitSeries = useMemo(
+    () => timeSeries.income.map((inc, idx) => inc - (timeSeries.expense[idx] ?? 0)),
+    [timeSeries],
   );
 
   const activeCapsules = useMemo(
@@ -115,7 +171,7 @@ export function DashboardBento() {
           backgroundColor: isDark ? '#4ea88f' : '#2f6c5c',
           borderRadius: 10,
           borderSkipped: false as const,
-          maxBarThickness: 18,
+          maxBarThickness: 16,
         },
         {
           label: t(lang, 'expense'),
@@ -123,7 +179,7 @@ export function DashboardBento() {
           backgroundColor: '#f4c245',
           borderRadius: 10,
           borderSkipped: false as const,
-          maxBarThickness: 18,
+          maxBarThickness: 16,
         },
       ],
     }),
@@ -170,110 +226,473 @@ export function DashboardBento() {
     [textColor, gridColor],
   );
 
-  const doughnutData = useMemo(
-    () => ({
-      labels: expenseCategories.map((r) => `${r.category.icon} ${getLocalizedName(r.category, lang)}`),
-      datasets: [
-        {
-          data: expenseCategories.map((r) => r.expense),
-          backgroundColor: expenseCategories.map((r, i) =>
-            i === 0 ? '#2f6c5c' : i === 1 ? '#f4c245' : i === 2 ? '#5ea18c' : r.category.color,
-          ),
-          borderColor: isDark ? '#142620' : '#ffffff',
-          borderWidth: 3,
-          hoverOffset: 6,
-        },
-      ],
-    }),
-    [expenseCategories, lang, isDark],
-  );
-
-  const doughnutOptions: ChartOptions<'doughnut'> = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '66%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: textColor,
-            boxWidth: 9,
-            usePointStyle: true,
-            pointStyle: 'circle',
-            padding: 8,
-            font: { size: 10.5 },
-          },
-        },
-        tooltip: {
-          backgroundColor: '#265648',
-          padding: 10,
-          cornerRadius: 10,
-          callbacks: {
-            label: (ctx) => {
-              const row = expenseCategories[ctx.dataIndex];
-              const pct = row ? ` (${row.expenseSharePercent}%)` : '';
-              return `${ctx.label}: ${formatCurrency(Number(ctx.raw ?? 0))}${pct}`;
-            },
-          },
-        },
-      },
-    }),
-    [textColor, expenseCategories],
-  );
-
   const hasBarData =
     timeSeries.labels.length > 0 &&
     (timeSeries.income.some((v) => v > 0) || timeSeries.expense.some((v) => v > 0));
 
-  const recentRows = filteredTransactions.slice(0, 6);
+  const recentRows = filteredTransactions.slice(0, 5);
   const activeDivision = divisions.find((d) => d.id === filters.divisionId);
 
   return (
-    <div className="crextio-bento">
-      {/* COLUMN 1: Ice-Blue Balance Spotlight + Finance Divisions List */}
-      <div className="crextio-col">
-        <section className="ice-spotlight-card" aria-label="Balance spotlight">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.9 }}>
+    <div className="sage-bento-layout">
+      {/* ROW 1: My Balance Card + 3 Quick Action Tiles | Profit & Savings Curve */}
+      <div className="sage-row-1">
+        <section className="card" aria-label="Balance spotlight">
+          <div className="section-header" style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <h3 className="section-title" style={{ fontSize: '1.08rem' }}>
+                {t(lang, 'netBalance')}
+              </h3>
+              <button
+                type="button"
+                className="sage-mini-link"
+                onClick={() => openAddModal()}
+              >
+                + {t(lang, 'create')}
+              </button>
+            </div>
+            <span className="badge" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
               {activeDivision ? `${activeDivision.icon} ${getLocalizedName(activeDivision, lang)}` : t(lang, 'allDivisions')}
-            </span>
-            <span style={{ fontSize: '0.72rem', opacity: 0.88 }}>
-              {summary.transactionCount} {t(lang, 'entriesCount')}
             </span>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: '0.76rem', fontWeight: 700, opacity: 0.9 }}>
-                {t(lang, 'netBalance')}
+          <div className="sage-card-and-actions">
+            <div className="sage-card-showcase">
+              <div className="ice-spotlight-card sage-debit-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, opacity: 0.9 }}>
+                    {t(lang, 'appName')} CARD
+                  </span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, opacity: 0.92 }}>
+                    {summary.transactionCount} {t(lang, 'entriesCount')}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.8rem', letterSpacing: '0.08em', opacity: 0.85, fontWeight: 600 }}>
+                  •••• •••• •••• MYFIN
+                </div>
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, lineHeight: 1.2 }}>
-                {formatCurrency(summary.balance)}
+
+              <div className="sage-balance-meta">
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                  {t(lang, 'netBalance')}
+                </span>
+                <div
+                  style={{
+                    fontSize: '1.35rem',
+                    fontWeight: 900,
+                    lineHeight: 1.15,
+                    color: summary.balance < 0 ? 'var(--expense)' : 'var(--text-primary)',
+                  }}
+                >
+                  {formatCurrency(summary.balance)}
+                </div>
+                <button
+                  type="button"
+                  className="sage-mini-link"
+                  onClick={() => setActiveTab('categories')}
+                >
+                  <span>{t(lang, 'navCategories')}</span>
+                  <ArrowUpRight size={13} />
+                </button>
               </div>
             </div>
 
-            <button
-              type="button"
-              className="ice-balance-pill"
-              onClick={() => setActiveTab('categories')}
-            >
-              <span>{t(lang, 'navCategories')}</span>
-              <ArrowUpRight size={14} />
-            </button>
+            <div className="sage-quick-tiles">
+              <button
+                type="button"
+                className="sage-action-tile"
+                onClick={() => openAddModal({ type: 'income' })}
+              >
+                <span className="sage-tile-icon">
+                  <ArrowDownCircle size={18} />
+                </span>
+                <span>{t(lang, 'income')}</span>
+              </button>
+
+              <button
+                type="button"
+                className="sage-action-tile"
+                onClick={() => openAddModal({ type: 'expense' })}
+              >
+                <span className="sage-tile-icon">
+                  <ArrowUpCircle size={18} />
+                </span>
+                <span>{t(lang, 'expense')}</span>
+              </button>
+
+              <button
+                type="button"
+                className="sage-action-tile"
+                onClick={() => setActiveTab('calendar')}
+              >
+                <span className="sage-tile-icon">
+                  <CalendarDays size={18} />
+                </span>
+                <span>{t(lang, 'navCalendar')}</span>
+              </button>
+            </div>
           </div>
         </section>
 
-        <section className="card" style={{ flex: 1 }} aria-label={t(lang, 'division')}>
+        <section className="card" aria-label="Savings ring tracker">
+          <div className="section-header" style={{ marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="sage-circle-badge">
+                <TrendingUp size={16} />
+              </span>
+              <h3 className="section-title" style={{ fontSize: '1.02rem' }}>
+                {t(lang, 'savingsRate')}
+              </h3>
+            </div>
+            <button
+              type="button"
+              className="sage-mini-link"
+              onClick={() => setActiveTab('reports')}
+            >
+              <span>{t(lang, 'navReports')}</span>
+              <ArrowUpRight size={13} />
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+            <span style={{ fontSize: '1.55rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+              {gaugePct}%
+            </span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--income)' }}>
+              +{formatCurrency(summary.totalIncome)}
+            </span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--expense)' }}>
+              -{formatCurrency(summary.totalExpense)}
+            </span>
+          </div>
+
+          <SparklineWave
+            values={profitSeries}
+            strokeColor={isDark ? '#4ea88f' : '#2f6c5c'}
+            gradientId="spark-profit"
+          />
+        </section>
+      </div>
+
+      {/* ROW 2: Income Sparkline | Expenses Sparkline | Spendings Statistic Bar Chart */}
+      <div className="sage-row-2">
+        <section className="card sage-spark-card" aria-label={t(lang, 'totalIncome')}>
+          <div className="section-header" style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="sage-circle-badge income">
+                <ArrowDownCircle size={16} />
+              </span>
+              <h3 className="section-title" style={{ fontSize: '0.98rem' }}>
+                {t(lang, 'income')}
+              </h3>
+            </div>
+            <button
+              type="button"
+              className="arrow-circle-btn"
+              onClick={() => openAddModal({ type: 'income' })}
+              title={t(lang, 'addEntry')}
+            >
+              <Plus size={15} />
+            </button>
+          </div>
+
+          <SparklineWave
+            values={timeSeries.income}
+            strokeColor="#238768"
+            gradientId="spark-income"
+          />
+
+          <div className="sage-spark-footer">
+            <span style={{ fontSize: '1.22rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+              +{formatCurrency(summary.totalIncome)}
+            </span>
+            <span className="badge badge-income">+{incomeSharePct}%</span>
+          </div>
+        </section>
+
+        <section className="card sage-spark-card" aria-label={t(lang, 'totalExpense')}>
+          <div className="section-header" style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="sage-circle-badge expense">
+                <ArrowUpCircle size={16} />
+              </span>
+              <h3 className="section-title" style={{ fontSize: '0.98rem' }}>
+                {t(lang, 'expense')}
+              </h3>
+            </div>
+            <button
+              type="button"
+              className="arrow-circle-btn"
+              onClick={() => openAddModal({ type: 'expense' })}
+              title={t(lang, 'addEntry')}
+            >
+              <Plus size={15} />
+            </button>
+          </div>
+
+          <SparklineWave
+            values={timeSeries.expense}
+            strokeColor={isDark ? '#5cc4a5' : '#3b7a68'}
+            gradientId="spark-expense"
+          />
+
+          <div className="sage-spark-footer">
+            <span style={{ fontSize: '1.22rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+              -{formatCurrency(summary.totalExpense)}
+            </span>
+            <span className="badge badge-expense">-{expenseSharePct}%</span>
+          </div>
+        </section>
+
+        <section className="card" aria-label="Income vs Expense activity">
+          <div className="folder-tabs-row">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <h3 className="section-title" style={{ fontSize: '0.98rem' }}>
+                {t(lang, 'incomeVsExpenseChart')}
+              </h3>
+            </div>
+
+            <select
+              aria-label={t(lang, 'typeLabel')}
+              className="input-control"
+              style={{ width: 'auto', minWidth: 100, borderRadius: '999px', padding: '5px 12px', fontSize: '0.8rem' }}
+              value={filters.type}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  type: e.target.value as 'all' | TransactionType,
+                }))
+              }
+            >
+              <option value="all">{t(lang, 'all')}</option>
+              <option value="income">{t(lang, 'income')}</option>
+              <option value="expense">{t(lang, 'expense')}</option>
+            </select>
+          </div>
+
+          <div className="folder-tabs" style={{ marginBottom: 12 }} role="group" aria-label="Date range presets">
+            {presets.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`folder-tab-btn ${filters.preset === p.id ? 'active' : ''}`}
+                onClick={() => setFilters((prev) => ({ ...prev, preset: p.id }))}
+              >
+                <Calendar size={13} />
+                <span>{p.label}</span>
+              </button>
+            ))}
+
+            <button
+              type="button"
+              className="folder-tab-btn"
+              onClick={() => setActiveTab('calendar')}
+              title={t(lang, 'calendarTitle')}
+            >
+              <CalendarDays size={13} />
+              <span>{t(lang, 'navCalendar')}</span>
+            </button>
+
+            <button
+              type="button"
+              className="folder-tab-btn"
+              onClick={() => setActiveTab('reports')}
+              title={t(lang, 'periodArchiveTitle')}
+            >
+              <Archive size={13} />
+              <span>{t(lang, 'periodArchiveQuickNav')}</span>
+            </button>
+          </div>
+
+          {filters.preset === 'custom' && (
+            <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
+              <div className="field-group">
+                <label className="field-label" htmlFor="bento-from-date">
+                  {t(lang, 'fromDate')}
+                </label>
+                <input
+                  id="bento-from-date"
+                  type="date"
+                  className="input-control"
+                  value={filters.startDate}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div className="field-group">
+                <label className="field-label" htmlFor="bento-to-date">
+                  {t(lang, 'toDate')}
+                </label>
+                <input
+                  id="bento-to-date"
+                  type="date"
+                  className="input-control"
+                  value={filters.endDate}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+          )}
+
+          {hasBarData ? (
+            <div className="chart-canvas-wrap" style={{ height: 155 }}>
+              <Bar data={barData} options={barOptions} />
+            </div>
+          ) : (
+            <div className="empty-chart" style={{ height: 155 }}>
+              <BarChart2 size={24} />
+              <span>{t(lang, 'noChartData')}</span>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* ROW 3: Planning Categories Progress | Crisp White Latest Transactions | Divisions List */}
+      <div className="sage-row-3">
+        <section className="card" aria-label="Period and category analytics">
+          <div className="section-header" style={{ marginBottom: 12 }}>
+            <h3 className="section-title" style={{ fontSize: '1rem' }}>
+              {t(lang, 'viewByCategory')}
+            </h3>
+            <button
+              type="button"
+              className="sage-mini-link"
+              onClick={() => setActiveTab('categories')}
+            >
+              {t(lang, 'navCategories')} →
+            </button>
+          </div>
+
+          {activeCapsules.length > 0 ? (
+            <div className="sage-plan-list">
+              {activeCapsules.map((row) => {
+                const vol = row.income + row.expense;
+                const widthPct = Math.max(18, Math.round((vol / maxCapsuleVol) * 100));
+                return (
+                  <button
+                    key={row.category.id}
+                    type="button"
+                    className="sage-plan-item"
+                    onClick={() => setActiveTab('categories')}
+                  >
+                    <div className="sage-plan-head">
+                      <span className="sage-plan-title">
+                        {row.category.icon} {getLocalizedName(row.category, lang)}
+                      </span>
+                      <span className="sage-plan-amount">
+                        {formatCurrency(row.expense > 0 ? row.expense : row.income)}
+                      </span>
+                    </div>
+                    <div className="sage-plan-track">
+                      <div
+                        className="sage-plan-fill"
+                        style={{ width: `${widthPct}%` }}
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="empty-chart" style={{ height: 150 }}>
+              <PieChart size={24} />
+              <span>{t(lang, 'noChartData')}</span>
+            </div>
+          )}
+        </section>
+
+        <section className="card" aria-label="Transactions list">
+          <div className="section-header" style={{ marginBottom: 12 }}>
+            <h3 className="section-title" style={{ fontSize: '1rem' }}>
+              {t(lang, 'recentTransactions')}
+            </h3>
+            <button
+              type="button"
+              className="sage-mini-link"
+              onClick={() => setActiveTab('transactions')}
+            >
+              {recentRows.length}/{filteredTransactions.length}
+            </button>
+          </div>
+
+          {recentRows.length === 0 ? (
+            <div className="empty-state" style={{ padding: '16px 6px' }}>
+              <Wallet size={28} color="var(--accent)" />
+              <h3>{t(lang, 'noTransactionsTitle')}</h3>
+              <p>{t(lang, 'noTransactionsDesc')}</p>
+              <div className="actions-toolbar" style={{ justifyContent: 'center' }}>
+                <button type="button" className="btn-primary" onClick={() => openAddModal()}>
+                  <Plus size={15} />
+                  <span>{t(lang, 'addEntry')}</span>
+                </button>
+                <button type="button" className="btn-secondary" onClick={loadSampleData}>
+                  <Sparkles size={15} />
+                  <span>{t(lang, 'loadSampleData')}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="navy-tx-list">
+              {recentRows.map((tx) => {
+                const cat = categoryMap.get(tx.categoryId);
+                const div = divisionMap.get(tx.divisionId);
+                const isIncome = tx.type === 'income';
+                return (
+                  <div key={tx.id} className="sage-tx-row">
+                    <div className="todo-tx-left">
+                      <span className="sage-tx-icon">{cat?.icon ?? '🧾'}</span>
+                      <div style={{ minWidth: 0 }}>
+                        <div className="todo-tx-title" style={{ color: 'var(--text-primary)' }}>
+                          {tx.note || getLocalizedName(cat, lang)}
+                        </div>
+                        <div className="todo-tx-sub" style={{ color: 'var(--text-muted)' }}>
+                          {formatDisplayDate(tx.date, lang)} • {getLocalizedName(div, lang)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="todo-tx-right">
+                      <span
+                        className="todo-tx-amount"
+                        style={{ color: isIncome ? 'var(--income)' : 'var(--expense)' }}
+                      >
+                        {formatCurrency(isIncome ? tx.amount : -tx.amount, true)}
+                      </span>
+
+                      <div className="row-actions">
+                        <button
+                          type="button"
+                          className="mini-icon-btn"
+                          title={t(lang, 'edit')}
+                          aria-label={t(lang, 'edit')}
+                          onClick={() => openEditModal(tx)}
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          className="mini-icon-btn danger"
+                          title={t(lang, 'delete')}
+                          aria-label={t(lang, 'delete')}
+                          onClick={() => {
+                            if (window.confirm(t(lang, 'confirmDeleteTx'))) {
+                              deleteTransaction(tx.id);
+                            }
+                          }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="card" aria-label={t(lang, 'division')}>
           <div className="section-header" style={{ marginBottom: 10 }}>
-            <h3 className="section-title" style={{ fontSize: '0.96rem' }}>
+            <h3 className="section-title" style={{ fontSize: '1rem' }}>
               {t(lang, 'division')}
             </h3>
             <button
@@ -319,390 +738,6 @@ export function DashboardBento() {
               </button>
             ))}
           </div>
-        </section>
-      </div>
-
-      {/* COLUMN 2: Center Top (Progress Bar + Ring Tracker) & Bottom (Period Tabs + Category Breakdown) */}
-      <div className="crextio-col">
-        <div className="crextio-center-top">
-          {/* Top-Left Mini Card: Progress / Income vs Expense Bar Chart */}
-          <section className="card" aria-label="Income vs Expense activity">
-            <div className="section-header" style={{ marginBottom: 8 }}>
-              <div>
-                <h3 className="section-title" style={{ fontSize: '0.96rem' }}>
-                  {t(lang, 'incomeVsExpenseChart')}
-                </h3>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: 2 }}>
-                  {formatCurrency(summary.totalIncome)}
-                </div>
-              </div>
-              <button
-                type="button"
-                className="arrow-circle-btn"
-                onClick={() => setActiveTab('reports')}
-                title={t(lang, 'navReports')}
-              >
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
-
-            {hasBarData ? (
-              <div className="chart-canvas-wrap" style={{ height: 170 }}>
-                <Bar data={barData} options={barOptions} />
-              </div>
-            ) : (
-              <div className="empty-chart" style={{ height: 170 }}>
-                <BarChart2 size={26} />
-                <span>{t(lang, 'noChartData')}</span>
-              </div>
-            )}
-          </section>
-
-          {/* Top-Right Mini Card: Circular Ring Gauge (Time tracker style) */}
-          <section className="card" aria-label="Savings ring tracker">
-            <div className="section-header" style={{ marginBottom: 4 }}>
-              <h3 className="section-title" style={{ fontSize: '0.96rem' }}>
-                {t(lang, 'savingsRate')}
-              </h3>
-              <button
-                type="button"
-                className="arrow-circle-btn"
-                onClick={() => setActiveTab('categories')}
-                title={t(lang, 'navCategories')}
-              >
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
-
-            <div className="ring-gauge-wrap">
-              <div className="ring-svg-box">
-                <svg viewBox="0 0 150 150" width="150" height="150" aria-hidden="true">
-                  <circle
-                    cx="75"
-                    cy="75"
-                    r={ringRadius}
-                    fill="none"
-                    stroke="var(--bg-track)"
-                    strokeWidth="9"
-                    strokeDasharray="3 5"
-                  />
-                  <circle
-                    cx="75"
-                    cy="75"
-                    r={ringRadius}
-                    fill="none"
-                    stroke="#3b7a68"
-                    strokeWidth="9"
-                    strokeLinecap="round"
-                    strokeDasharray={ringCircumference}
-                    strokeDashoffset={ringOffset}
-                    transform="rotate(-90 75 75)"
-                  />
-                </svg>
-
-                <div className="ring-center-val">
-                  <span style={{ fontSize: '1.55rem', fontWeight: 800, lineHeight: 1.1 }}>
-                    {gaugePct}%
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    {t(lang, 'netBalance')}
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 10, fontSize: '0.76rem', fontWeight: 700 }}>
-                <span style={{ color: 'var(--income)' }}>
-                  +{formatCurrency(summary.totalIncome)}
-                </span>
-                <span style={{ color: 'var(--expense)' }}>
-                  -{formatCurrency(summary.totalExpense)}
-                </span>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        {/* Center Bottom Wide Card: Date Filter Tabs + Category Breakdown + Doughnut */}
-        <section className="card" style={{ flex: 1 }} aria-label="Period and category analytics">
-          <div className="folder-tabs-row">
-            <div className="folder-tabs" role="group" aria-label="Date range presets">
-              {presets.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className={`folder-tab-btn ${filters.preset === p.id ? 'active' : ''}`}
-                  onClick={() => setFilters((prev) => ({ ...prev, preset: p.id }))}
-                >
-                  <Calendar size={13} />
-                  <span>{p.label}</span>
-                </button>
-              ))}
-
-              <button
-                type="button"
-                className="folder-tab-btn"
-                onClick={() => setActiveTab('calendar')}
-                title={t(lang, 'calendarTitle')}
-              >
-                <CalendarDays size={13} />
-                <span>{t(lang, 'navCalendar')}</span>
-              </button>
-
-              <button
-                type="button"
-                className="folder-tab-btn"
-                onClick={() => setActiveTab('reports')}
-                title={t(lang, 'periodArchiveTitle')}
-              >
-                <Archive size={13} />
-                <span>{t(lang, 'periodArchiveQuickNav')}</span>
-              </button>
-            </div>
-
-            <select
-              aria-label={t(lang, 'typeLabel')}
-              className="input-control"
-              style={{ width: 'auto', minWidth: 110, borderRadius: '999px', padding: '5px 12px', fontSize: '0.82rem' }}
-              value={filters.type}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  type: e.target.value as 'all' | TransactionType,
-                }))
-              }
-            >
-              <option value="all">{t(lang, 'all')}</option>
-              <option value="income">{t(lang, 'income')}</option>
-              <option value="expense">{t(lang, 'expense')}</option>
-            </select>
-          </div>
-
-          {filters.preset === 'custom' && (
-            <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
-              <div className="field-group">
-                <label className="field-label" htmlFor="bento-from-date">
-                  {t(lang, 'fromDate')}
-                </label>
-                <input
-                  id="bento-from-date"
-                  type="date"
-                  className="input-control"
-                  value={filters.startDate}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
-                />
-              </div>
-              <div className="field-group">
-                <label className="field-label" htmlFor="bento-to-date">
-                  {t(lang, 'toDate')}
-                </label>
-                <input
-                  id="bento-to-date"
-                  type="date"
-                  className="input-control"
-                  value={filters.endDate}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="timeline-split">
-            <div>
-              <div className="section-header" style={{ marginBottom: 10 }}>
-                <h3 className="section-title" style={{ fontSize: '0.94rem' }}>
-                  {t(lang, 'viewByCategory')}
-                </h3>
-                <button
-                  type="button"
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    color: 'var(--accent)',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                  }}
-                  onClick={() => setActiveTab('categories')}
-                >
-                  {t(lang, 'navCategories')} →
-                </button>
-              </div>
-
-              {activeCapsules.length > 0 ? (
-                <div className="capsule-list">
-                  {activeCapsules.map((row, idx) => {
-                    const vol = row.income + row.expense;
-                    const widthPct = Math.max(48, Math.round((vol / maxCapsuleVol) * 100));
-                    const barColor = CAPSULE_COLORS[idx % CAPSULE_COLORS.length];
-                    return (
-                      <button
-                        key={row.category.id}
-                        type="button"
-                        className="capsule-track"
-                        onClick={() => setActiveTab('categories')}
-                      >
-                        <div
-                          className="capsule-fill"
-                          style={{ width: `${widthPct}%`, backgroundColor: barColor }}
-                        >
-                          <span
-                            style={{
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {row.category.icon} {getLocalizedName(row.category, lang)}
-                          </span>
-                          <span>{formatCurrency(row.expense > 0 ? row.expense : row.income)}</span>
-                        </div>
-                        <span className="capsule-meta-pill">
-                          {row.expenseSharePercent > 0
-                            ? `${row.expenseSharePercent}%`
-                            : `${row.count}`}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="empty-chart" style={{ height: 170 }}>
-                  <PieChart size={26} />
-                  <span>{t(lang, 'noChartData')}</span>
-                </div>
-              )}
-            </div>
-
-            <div>
-              {expenseCategories.length > 0 ? (
-                <div className="chart-canvas-wrap" style={{ height: 195 }}>
-                  <Doughnut data={doughnutData} options={doughnutOptions} />
-                </div>
-              ) : (
-                <div className="empty-chart" style={{ height: 195 }}>
-                  <PieChart size={26} />
-                  <span>{t(lang, 'categoryExpenseChart')}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* COLUMN 3: Stacked White Header + Deep Midnight Navy Featured Transactions List */}
-      <div className="navy-stack-wrap">
-        <div className="navy-stack-header">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t(lang, 'navCategories')}</span>
-            <span style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--navy-deep)' }}>
-              {gaugePct}%
-            </span>
-          </div>
-          <div className="segmented-progress-bar" style={{ marginTop: 10 }}>
-            <div className="seg-pill cobalt" style={{ height: 18, flex: 1, fontSize: '0.68rem' }}>
-              {categories.length}
-            </div>
-            <div className="seg-pill navy" style={{ height: 18, width: '34%', fontSize: '0.68rem' }}>
-              {divisions.length}
-            </div>
-          </div>
-        </div>
-
-        <section className="navy-featured-card" aria-label="Transactions list">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>
-              {t(lang, 'recentTransactions')}
-            </h3>
-            <button
-              type="button"
-              onClick={() => setActiveTab('transactions')}
-              style={{
-                border: '1px solid rgba(255,255,255,0.25)',
-                background: 'rgba(255,255,255,0.1)',
-                color: '#fff',
-                borderRadius: '999px',
-                padding: '3px 10px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-              }}
-            >
-              {recentRows.length}/{filteredTransactions.length}
-            </button>
-          </div>
-
-          {recentRows.length === 0 ? (
-            <div className="empty-state" style={{ color: '#e2f3ec', padding: '18px 4px' }}>
-              <Wallet size={30} color="#f4c245" />
-              <h3 style={{ color: '#ffffff' }}>{t(lang, 'noTransactionsTitle')}</h3>
-              <p style={{ color: '#b8e0d2' }}>{t(lang, 'noTransactionsDesc')}</p>
-              <div className="actions-toolbar" style={{ justifyContent: 'center' }}>
-                <button type="button" className="btn-primary" onClick={() => openAddModal()}>
-                  <Plus size={15} />
-                  <span>{t(lang, 'addEntry')}</span>
-                </button>
-                <button type="button" className="btn-secondary" onClick={loadSampleData}>
-                  <Sparkles size={15} />
-                  <span>{t(lang, 'loadSampleData')}</span>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="navy-tx-list">
-              {recentRows.map((tx) => {
-                const cat = categoryMap.get(tx.categoryId);
-                const div = divisionMap.get(tx.divisionId);
-                const isIncome = tx.type === 'income';
-                return (
-                  <div key={tx.id} className="navy-tx-row">
-                    <div className="todo-tx-left">
-                      <span className="navy-tx-icon">{cat?.icon ?? '🧾'}</span>
-                      <div style={{ minWidth: 0 }}>
-                        <div className="todo-tx-title" style={{ color: '#ffffff' }}>
-                          {tx.note || getLocalizedName(cat, lang)}
-                        </div>
-                        <div className="todo-tx-sub" style={{ color: '#b6e3d3' }}>
-                          {formatDisplayDate(tx.date, lang)} • {getLocalizedName(div, lang)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="todo-tx-right">
-                      <span
-                        className="todo-tx-amount"
-                        style={{ color: isIncome ? '#4ade80' : '#fca5a5' }}
-                      >
-                        {formatCurrency(isIncome ? tx.amount : -tx.amount, true)}
-                      </span>
-
-                      <div className="row-actions">
-                        <button
-                          type="button"
-                          className="navy-mini-btn"
-                          title={t(lang, 'edit')}
-                          aria-label={t(lang, 'edit')}
-                          onClick={() => openEditModal(tx)}
-                        >
-                          <Edit3 size={12} />
-                        </button>
-                        <button
-                          type="button"
-                          className="navy-mini-btn danger"
-                          title={t(lang, 'delete')}
-                          aria-label={t(lang, 'delete')}
-                          onClick={() => {
-                            if (window.confirm(t(lang, 'confirmDeleteTx'))) {
-                              deleteTransaction(tx.id);
-                            }
-                          }}
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </section>
       </div>
     </div>
