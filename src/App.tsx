@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { CalendarReports } from './components/CalendarReports';
 import { CategoryOverview } from './components/CategoryOverview';
-import { ChartsSection } from './components/ChartsSection';
 import { CloudSyncModal } from './components/CloudSyncModal';
 import { DashboardBento } from './components/DashboardBento';
 import { FilterBar } from './components/FilterBar';
@@ -58,7 +57,6 @@ function FinanceWorkspace() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <FilterBar />
                 <SummaryCards />
-                <ChartsSection />
                 <ReportsExport />
               </div>
             )}

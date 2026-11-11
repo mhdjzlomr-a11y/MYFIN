@@ -65,7 +65,7 @@ export function PrintableReportSheet({
     <div ref={forwardedRef} className={className}>
       <div className="report-sheet-header">
         <div>
-          <h2 style={{ margin: 0, fontSize: '18px', color: '#2f6c5c' }}>
+          <h2 style={{ margin: 0, fontSize: '18px', color: '#181822' }}>
             {t(lang, 'appName')} — {t(lang, 'reportsTitle')}
           </h2>
           <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#475569' }}>

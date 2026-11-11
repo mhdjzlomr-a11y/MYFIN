@@ -3,93 +3,22 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   ArrowUpRight,
-  BarChart2,
   Calendar,
   CalendarDays,
   ChevronRight,
   Edit3,
   PieChart,
   Plus,
+  Receipt,
   Sparkles,
   Trash2,
   TrendingUp,
   Wallet,
 } from 'lucide-react';
 import { useMemo } from 'react';
-import { Bar } from 'react-chartjs-2';
-import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Title,
-  Tooltip,
-  type ChartOptions,
-} from 'chart.js';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, formatDisplayDate, getLocalizedName, t } from '../i18n/translations';
-import { computeTimeSeries } from '../services/analytics';
 import type { DateFilterPreset, TransactionType } from '../types/finance';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
-
-function SparklineWave({
-  values,
-  strokeColor,
-  gradientId,
-}: {
-  values: number[];
-  strokeColor: string;
-  gradientId: string;
-}) {
-  const safeValues =
-    values.length >= 2 && values.some((v) => v !== 0)
-      ? values
-      : [18, 26, 21, 30, 24, 34, 29];
-
-  const width = 180;
-  const height = 52;
-  const padY = 6;
-  const minVal = Math.min(...safeValues);
-  const maxVal = Math.max(...safeValues);
-  const span = maxVal - minVal || 1;
-
-  const points = safeValues.map((val, idx) => {
-    const x = (idx / Math.max(1, safeValues.length - 1)) * width;
-    const norm = (val - minVal) / span;
-    const y = height - padY - norm * (height - padY * 2);
-    return { x: Number(x.toFixed(1)), y: Number(y.toFixed(1)) };
-  });
-
-  const linePath = points.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`).join(' ');
-  const areaPath = `${linePath} L ${width} ${height} L 0 ${height} Z`;
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="sage-sparkline-svg"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.28" />
-          <stop offset="100%" stopColor={strokeColor} stopOpacity="0.02" />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill={`url(#${gradientId})`} />
-      <path
-        d={linePath}
-        fill="none"
-        stroke={strokeColor}
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 export function DashboardBento() {
   const {
@@ -110,10 +39,6 @@ export function DashboardBento() {
   } = useFinance();
 
   const lang = settings.language;
-  const isDark = settings.theme === 'dark';
-  const textColor = isDark ? '#bfd6ce' : '#476058';
-  const gridColor = isDark ? 'rgba(116, 198, 169, 0.14)' : 'rgba(47, 108, 92, 0.08)';
-
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const divisionMap = useMemo(() => new Map(divisions.map((d) => [d.id, d])), [divisions]);
 
@@ -134,23 +59,6 @@ export function DashboardBento() {
     { id: 'custom', label: t(lang, 'filterCustom') },
   ];
 
-  const timeSeries = useMemo(
-    () =>
-      computeTimeSeries(
-        filteredTransactions,
-        filters.preset,
-        filters.startDate,
-        filters.endDate,
-        lang,
-      ),
-    [filteredTransactions, filters.preset, filters.startDate, filters.endDate, lang],
-  );
-
-  const profitSeries = useMemo(
-    () => timeSeries.income.map((inc, idx) => inc - (timeSeries.expense[idx] ?? 0)),
-    [timeSeries],
-  );
-
   const activeCapsules = useMemo(
     () => categorySummary.filter((r) => r.income + r.expense > 0).slice(0, 3),
     [categorySummary],
@@ -161,81 +69,12 @@ export function DashboardBento() {
     [activeCapsules],
   );
 
-  const barData = useMemo(
-    () => ({
-      labels: timeSeries.labels,
-      datasets: [
-        {
-          label: t(lang, 'income'),
-          data: timeSeries.income,
-          backgroundColor: isDark ? '#4ea88f' : '#2f6c5c',
-          borderRadius: 10,
-          borderSkipped: false as const,
-          maxBarThickness: 16,
-        },
-        {
-          label: t(lang, 'expense'),
-          data: timeSeries.expense,
-          backgroundColor: '#f4c245',
-          borderRadius: 10,
-          borderSkipped: false as const,
-          maxBarThickness: 16,
-        },
-      ],
-    }),
-    [timeSeries, lang, isDark],
-  );
-
-  const barOptions: ChartOptions<'bar'> = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-          align: 'end',
-          labels: { color: textColor, boxWidth: 8, usePointStyle: true, pointStyle: 'circle' },
-        },
-        tooltip: {
-          backgroundColor: '#265648',
-          titleColor: '#ffffff',
-          bodyColor: '#e2f3ec',
-          padding: 10,
-          cornerRadius: 10,
-          callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${formatCurrency(Number(ctx.raw ?? 0))}`,
-          },
-        },
-      },
-      scales: {
-        x: {
-          ticks: { color: textColor, font: { size: 10 } },
-          grid: { display: false },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: textColor,
-            font: { size: 10 },
-            callback: (val) => `₹${val}`,
-          },
-          grid: { color: gridColor },
-        },
-      },
-    }),
-    [textColor, gridColor],
-  );
-
-  const hasBarData =
-    timeSeries.labels.length > 0 &&
-    (timeSeries.income.some((v) => v > 0) || timeSeries.expense.some((v) => v > 0));
-
   const recentRows = filteredTransactions.slice(0, 5);
   const activeDivision = divisions.find((d) => d.id === filters.divisionId);
 
   return (
     <div className="sage-bento-layout">
-      {/* ROW 1: My Balance Card + 3 Quick Action Tiles | Profit & Savings Curve */}
+      {/* ROW 1: My Balance Card + 3 Quick Action Tiles | Profit & Savings Summary */}
       <div className="sage-row-1">
         <section className="card" aria-label="Balance spotlight">
           <div className="section-header" style={{ marginBottom: 12 }}>
@@ -260,14 +99,14 @@ export function DashboardBento() {
             <div className="sage-card-showcase">
               <div className="ice-spotlight-card sage-debit-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, opacity: 0.9 }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, opacity: 0.92 }}>
                     {t(lang, 'appName')} CARD
                   </span>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, opacity: 0.92 }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, opacity: 0.94 }}>
                     {summary.transactionCount} {t(lang, 'entriesCount')}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.8rem', letterSpacing: '0.08em', opacity: 0.85, fontWeight: 600 }}>
+                <div style={{ fontSize: '0.8rem', letterSpacing: '0.08em', opacity: 0.88, fontWeight: 600 }}>
                   •••• •••• •••• MYFIN
                 </div>
               </div>
@@ -335,7 +174,7 @@ export function DashboardBento() {
         </section>
 
         <section className="card" aria-label="Savings ring tracker">
-          <div className="section-header" style={{ marginBottom: 6 }}>
+          <div className="section-header" style={{ marginBottom: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className="sage-circle-badge">
                 <TrendingUp size={16} />
@@ -354,30 +193,34 @@ export function DashboardBento() {
             </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
-            <span style={{ fontSize: '1.55rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
+            <span style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)' }}>
               {gaugePct}%
             </span>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--income)' }}>
-              +{formatCurrency(summary.totalIncome)}
-            </span>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--expense)' }}>
-              -{formatCurrency(summary.totalExpense)}
+            <span className="badge" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+              {summary.transactionCount} {t(lang, 'entriesCount')}
             </span>
           </div>
 
-          <SparklineWave
-            values={profitSeries}
-            strokeColor={isDark ? '#4ea88f' : '#2f6c5c'}
-            gradientId="spark-profit"
-          />
+          <div className="sage-plan-track" style={{ marginBottom: 12, height: 10 }}>
+            <div className="sage-plan-fill" style={{ width: `${gaugePct}%` }} />
+          </div>
+
+          <div className="sage-spark-footer">
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--income)' }}>
+              +{formatCurrency(summary.totalIncome)}
+            </span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--expense)' }}>
+              -{formatCurrency(summary.totalExpense)}
+            </span>
+          </div>
         </section>
       </div>
 
-      {/* ROW 2: Income Sparkline | Expenses Sparkline | Spendings Statistic Bar Chart */}
+      {/* ROW 2: Income Card | Expense Card | Period Filters & Quick Summary (No Graphs) */}
       <div className="sage-row-2">
         <section className="card sage-spark-card" aria-label={t(lang, 'totalIncome')}>
-          <div className="section-header" style={{ marginBottom: 8 }}>
+          <div className="section-header" style={{ marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className="sage-circle-badge income">
                 <ArrowDownCircle size={16} />
@@ -396,14 +239,12 @@ export function DashboardBento() {
             </button>
           </div>
 
-          <SparklineWave
-            values={timeSeries.income}
-            strokeColor="#238768"
-            gradientId="spark-income"
-          />
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            {t(lang, 'totalIncome')}
+          </div>
 
           <div className="sage-spark-footer">
-            <span style={{ fontSize: '1.22rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: '1.42rem', fontWeight: 900, color: 'var(--income)' }}>
               +{formatCurrency(summary.totalIncome)}
             </span>
             <span className="badge badge-income">+{incomeSharePct}%</span>
@@ -411,7 +252,7 @@ export function DashboardBento() {
         </section>
 
         <section className="card sage-spark-card" aria-label={t(lang, 'totalExpense')}>
-          <div className="section-header" style={{ marginBottom: 8 }}>
+          <div className="section-header" style={{ marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className="sage-circle-badge expense">
                 <ArrowUpCircle size={16} />
@@ -430,25 +271,26 @@ export function DashboardBento() {
             </button>
           </div>
 
-          <SparklineWave
-            values={timeSeries.expense}
-            strokeColor={isDark ? '#5cc4a5' : '#3b7a68'}
-            gradientId="spark-expense"
-          />
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            {t(lang, 'totalExpense')}
+          </div>
 
           <div className="sage-spark-footer">
-            <span style={{ fontSize: '1.22rem', fontWeight: 900, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: '1.42rem', fontWeight: 900, color: 'var(--expense)' }}>
               -{formatCurrency(summary.totalExpense)}
             </span>
             <span className="badge badge-expense">-{expenseSharePct}%</span>
           </div>
         </section>
 
-        <section className="card" aria-label="Income vs Expense activity">
+        <section className="card" aria-label="Period filter and quick totals">
           <div className="folder-tabs-row">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span className="sage-circle-badge">
+                <Receipt size={15} />
+              </span>
               <h3 className="section-title" style={{ fontSize: '0.98rem' }}>
-                {t(lang, 'incomeVsExpenseChart')}
+                {t(lang, 'reportsTitle')}
               </h3>
             </div>
 
@@ -533,20 +375,33 @@ export function DashboardBento() {
             </div>
           )}
 
-          {hasBarData ? (
-            <div className="chart-canvas-wrap" style={{ height: 155 }}>
-              <Bar data={barData} options={barOptions} />
+          <div className="category-metrics" style={{ paddingTop: 10 }}>
+            <div className="metric-cell">
+              <span className="metric-label">{t(lang, 'totalIncome')}</span>
+              <span className="metric-num" style={{ color: 'var(--income)' }}>
+                {formatCurrency(summary.totalIncome)}
+              </span>
             </div>
-          ) : (
-            <div className="empty-chart" style={{ height: 155 }}>
-              <BarChart2 size={24} />
-              <span>{t(lang, 'noChartData')}</span>
+            <div className="metric-cell">
+              <span className="metric-label">{t(lang, 'totalExpense')}</span>
+              <span className="metric-num" style={{ color: 'var(--expense)' }}>
+                {formatCurrency(summary.totalExpense)}
+              </span>
             </div>
-          )}
+            <div className="metric-cell">
+              <span className="metric-label">{t(lang, 'netBalance')}</span>
+              <span
+                className="metric-num"
+                style={{ color: summary.balance < 0 ? 'var(--expense)' : 'var(--balance)' }}
+              >
+                {formatCurrency(summary.balance)}
+              </span>
+            </div>
+          </div>
         </section>
       </div>
 
-      {/* ROW 3: Planning Categories Progress | Crisp White Latest Transactions | Divisions List */}
+      {/* ROW 3: Planning Categories Progress | Crisp Latest Transactions | Divisions List */}
       <div className="sage-row-3">
         <section className="card" aria-label="Period and category analytics">
           <div className="section-header" style={{ marginBottom: 12 }}>
@@ -593,7 +448,7 @@ export function DashboardBento() {
               })}
             </div>
           ) : (
-            <div className="empty-chart" style={{ height: 150 }}>
+            <div className="empty-chart" style={{ height: 140 }}>
               <PieChart size={24} />
               <span>{t(lang, 'noChartData')}</span>
             </div>
