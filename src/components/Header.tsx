@@ -16,6 +16,7 @@ import {
   Search,
   Sun,
   X,
+  Zap,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
@@ -107,28 +108,27 @@ export function Header({
               <Menu size={17} />
             </button>
 
-            <h1 className="brand-wordmark ux-brand-pill">
-              <span className="brand-ux-mark" aria-hidden="true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z" />
-                </svg>
+            <h1 className="brand-wordmark onyx-brand-wrap">
+              <span className="brand-onyx-bolt" aria-hidden="true">
+                <Zap size={16} fill="currentColor" strokeWidth={1.8} />
               </span>
-              <span>{t(lang, 'appName')}</span>
+              <span className="onyx-brand-text">{t(lang, 'appName')}</span>
             </h1>
-          </div>
 
-          <nav className="header-center-pills" aria-label="Primary tabs">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`header-nav-pill ${activeTab === item.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(item.id)}
-              >
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
+            <nav className="header-center-pills" aria-label="Primary tabs">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`header-nav-pill ${activeTab === item.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(item.id)}
+                >
+                  <span className="header-pill-icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
 
           <div className="header-actions">
             {activeCategory && (

@@ -149,7 +149,7 @@ export function TransactionModal() {
 
   return (
     <div className="modal-backdrop no-print" role="dialog" aria-modal="true">
-      <div className="modal-card">
+      <div className="modal-card modal-tx-card">
         <div className="modal-header">
           <h2>{editingTransaction ? t(lang, 'editEntry') : t(lang, 'addEntry')}</h2>
           <button
@@ -158,11 +158,11 @@ export function TransactionModal() {
             onClick={closeTxModal}
             aria-label={t(lang, 'cancel')}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        <form className="modal-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form className="modal-form" onSubmit={handleSubmit}>
           <div className="type-switch">
             <button
               type="button"
@@ -180,7 +180,7 @@ export function TransactionModal() {
             </button>
           </div>
 
-          <div className="responsive-grid-2">
+          <div className="modal-compact-grid-2">
             <div className="field-group">
               <label className="field-label" htmlFor="tx-amount">
                 {t(lang, 'amount')}
@@ -188,6 +188,7 @@ export function TransactionModal() {
               <input
                 id="tx-amount"
                 type="number"
+                inputMode="decimal"
                 step="0.01"
                 min="0.01"
                 className="input-control"
@@ -195,7 +196,6 @@ export function TransactionModal() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
-                autoFocus
               />
             </div>
 
@@ -214,70 +214,60 @@ export function TransactionModal() {
             </div>
           </div>
 
-          <div className="field-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label className="field-label" htmlFor="tx-division">
-                {t(lang, 'division')}
-              </label>
-              <button
-                type="button"
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'var(--accent)',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                }}
-                onClick={() => setInlineMode(inlineMode === 'division' ? null : 'division')}
+          <div className="modal-compact-grid-2">
+            <div className="field-group">
+              <div className="modal-field-head">
+                <label className="field-label" htmlFor="tx-division">
+                  {t(lang, 'division')}
+                </label>
+                <button
+                  type="button"
+                  className="modal-inline-trigger"
+                  onClick={() => setInlineMode(inlineMode === 'division' ? null : 'division')}
+                >
+                  {t(lang, 'addNewDivision')}
+                </button>
+              </div>
+              <select
+                id="tx-division"
+                className="input-control"
+                value={divisionId}
+                onChange={(e) => setDivisionId(e.target.value)}
               >
-                {t(lang, 'addNewDivision')}
-              </button>
+                {divisions.map((div) => (
+                  <option key={div.id} value={div.id}>
+                    {div.icon} {getLocalizedName(div, lang)}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select
-              id="tx-division"
-              className="input-control"
-              value={divisionId}
-              onChange={(e) => setDivisionId(e.target.value)}
-            >
-              {divisions.map((div) => (
-                <option key={div.id} value={div.id}>
-                  {div.icon} {getLocalizedName(div, lang)}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div className="field-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label className="field-label" htmlFor="tx-category">
-                {t(lang, 'category')}
-              </label>
-              <button
-                type="button"
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'var(--accent)',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                }}
-                onClick={() => setInlineMode(inlineMode === 'category' ? null : 'category')}
+            <div className="field-group">
+              <div className="modal-field-head">
+                <label className="field-label" htmlFor="tx-category">
+                  {t(lang, 'category')}
+                </label>
+                <button
+                  type="button"
+                  className="modal-inline-trigger"
+                  onClick={() => setInlineMode(inlineMode === 'category' ? null : 'category')}
+                >
+                  {t(lang, 'addNewCategory')}
+                </button>
+              </div>
+              <select
+                id="tx-category"
+                className="input-control"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
               >
-                {t(lang, 'addNewCategory')}
-              </button>
+                {sortedCategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.icon} {getLocalizedName(cat, lang)}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select
-              id="tx-category"
-              className="input-control"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-            >
-              {sortedCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.icon} {getLocalizedName(cat, lang)}
-                </option>
-              ))}
-            </select>
           </div>
 
           {inlineMode && (
